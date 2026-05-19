@@ -1,0 +1,1497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="color-scheme" content="dark light" />
+<title>Andes / G — A photographic essay</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,200..900,0..100;1,9..144,200..900,0..100&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=JetBrains+Mono:wght@400;500&display=swap"
+/>
+
+<style>
+  /* -------------------------------------------------------------------------
+     Design tokens
+     ------------------------------------------------------------------------- */
+  :root {
+    --ink:        #14110d;
+    --paper:      #f1ece1;
+    --paper-dim:  #e3dccb;
+    --salt:       #cfd6dc;
+    --stone:      #8a6f55;
+    --copper:     #b8633a;
+    --moss:       #2f3b22;
+    --rule:       rgba(20, 17, 13, 0.18);
+    --rule-paper: rgba(241, 236, 225, 0.22);
+
+    --ff-display: "Fraunces", "Newsreader", Georgia, serif;
+    --ff-text:    "Newsreader", "Iowan Old Style", Georgia, serif;
+    --ff-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --grid-pad:   clamp(20px, 4vw, 56px);
+    --max:        min(1480px, 92vw);
+  }
+
+  /* -------------------------------------------------------------------------
+     Reset
+     ------------------------------------------------------------------------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--ff-text);
+    font-size: 18px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  button { font: inherit; cursor: pointer; }
+
+  /* Lenis smooth-scroll requires this on html */
+  html.lenis { height: auto; }
+  html.lenis body { height: auto; }
+  html.lenis-smooth { scroll-behavior: auto !important; }
+  html.lenis-smooth iframe { pointer-events: none; }
+
+  /* -------------------------------------------------------------------------
+     Persistent UI
+     ------------------------------------------------------------------------- */
+  .masthead {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px var(--grid-pad);
+    color: var(--paper);
+    mix-blend-mode: difference;
+    pointer-events: none;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .masthead .logo {
+    font-family: var(--ff-display);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    font-variation-settings: "opsz" 72, "SOFT" 50;
+  }
+  .masthead nav { display: flex; gap: 22px; pointer-events: auto; }
+  .masthead nav a {
+    text-decoration: none;
+    opacity: 0.55;
+    transition: opacity 220ms ease;
+  }
+  .masthead nav a:hover,
+  .masthead nav a[data-active] { opacity: 1; }
+
+  .progress {
+    position: fixed; left: 0; top: 0; height: 2px; width: 100%;
+    z-index: 60; pointer-events: none;
+    background: transparent;
+  }
+  .progress::after {
+    content: "";
+    display: block; height: 100%; width: var(--p, 0%);
+    background: var(--ink);
+    transition: width 60ms linear;
+  }
+
+  /* -------------------------------------------------------------------------
+     0 — Cover
+     ------------------------------------------------------------------------- */
+  .cover {
+    position: relative;
+    height: 100vh; min-height: 640px;
+    overflow: hidden;
+    background: #000;
+    color: var(--paper);
+  }
+  .cover__bg {
+    position: absolute; inset: -4%;
+    background-image: url("assets/peru/01-salar.jpg");
+    background-size: cover;
+    background-position: 50% 58%;
+    transform-origin: 50% 60%;
+    will-change: transform;
+  }
+  .cover__veil {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+  }
+  .cover__frame {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 110px var(--grid-pad) 56px;
+  }
+  .cover__hgroup {
+    align-self: end;
+    max-width: 1080px;
+  }
+  .cover__eyebrow {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin: 0 0 28px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .cover__eyebrow::before {
+    content: ""; display: inline-block;
+    width: 28px; height: 1px; background: currentColor;
+  }
+  .cover__title {
+    margin: 0;
+    font-family: var(--ff-display);
+    font-weight: 250;
+    font-size: clamp(56px, 12vw, 188px);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    font-variation-settings: "opsz" 144, "SOFT" 40;
+  }
+  .cover__title .row { display: block; }
+  .cover__title .row + .row { margin-top: -0.02em; }
+  .cover__title em {
+    font-style: italic;
+    font-weight: 300;
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+  }
+  .cover__title .num {
+    display: inline-block;
+    font-variation-settings: "opsz" 144, "SOFT" 0, "wght" 600;
+    letter-spacing: -0.05em;
+  }
+  .cover__title .num .digit { display: inline-block; will-change: transform; }
+  .cover__sub {
+    margin: 32px 0 0;
+    max-width: 36ch;
+    font-family: var(--ff-text);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(16px, 1.4vw, 21px);
+    line-height: 1.45;
+    opacity: 0.86;
+  }
+  .cover__foot {
+    display: flex; align-items: end; justify-content: space-between;
+    gap: 32px; padding-top: 32px;
+    border-top: 1px solid var(--rule-paper);
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .cover__foot dl { display: flex; gap: 56px; margin: 0; }
+  .cover__foot dt { opacity: 0.6; }
+  .cover__foot dd { margin: 0 0 0 8px; display: inline; }
+  .cover__foot .col { display: flex; align-items: baseline; }
+  .scroll-cue {
+    display: inline-flex; align-items: center; gap: 12px;
+    opacity: 0.8;
+  }
+  .scroll-cue .ln {
+    display: inline-block; width: 56px; height: 1px; background: currentColor;
+    position: relative; overflow: hidden;
+  }
+  .scroll-cue .ln::after {
+    content: ""; position: absolute; inset: 0;
+    background: rgba(255,255,255,0.5);
+    transform: translateX(-100%);
+    animation: cue 2.4s cubic-bezier(.6,.02,.2,1) infinite;
+  }
+  @keyframes cue {
+    0%   { transform: translateX(-100%); }
+    55%  { transform: translateX(100%);  }
+    100% { transform: translateX(100%);  }
+  }
+
+  /* -------------------------------------------------------------------------
+     Section primitives
+     ------------------------------------------------------------------------- */
+  .chapter {
+    position: relative;
+    padding: clamp(80px, 12vh, 160px) var(--grid-pad);
+  }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.65;
+  }
+  .kicker::before {
+    content: ""; width: 28px; height: 1px; background: currentColor;
+  }
+  .chapter__title {
+    font-family: var(--ff-display);
+    font-weight: 300;
+    font-size: clamp(64px, 11vw, 188px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin: 18px 0 28px;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+  .dateline {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+  .lede {
+    font-family: var(--ff-text);
+    font-size: clamp(20px, 1.7vw, 26px);
+    line-height: 1.45;
+    font-weight: 400;
+    max-width: 32ch;
+    margin: 26px 0 0;
+  }
+  .lede em { font-style: italic; }
+  .body-text {
+    max-width: 36ch;
+    margin-top: 22px;
+    font-size: 17px;
+    line-height: 1.62;
+    opacity: 0.85;
+  }
+  .body-text + .body-text { margin-top: 18px; }
+
+  /* small-cap dropcap-ish first letter for body */
+  .body-text--lead::first-letter {
+    font-family: var(--ff-display);
+    font-weight: 500;
+    font-size: 3.2em;
+    float: left;
+    line-height: 0.88;
+    padding: 6px 10px 0 0;
+    font-variation-settings: "opsz" 144, "SOFT" 80;
+  }
+
+  .reveal-word { display: inline-block; overflow: hidden; }
+  .reveal-word > span { display: inline-block; transform: translateY(110%); will-change: transform; }
+  .reveal-line { display: block; overflow: hidden; }
+  .reveal-line > span { display: block; transform: translateY(110%); will-change: transform; }
+
+  /* -------------------------------------------------------------------------
+     I — Salt
+     ------------------------------------------------------------------------- */
+  .salt {
+    background: var(--paper);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .salt__grid {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(40px, 6vw, 96px);
+    align-items: center;
+  }
+  .salt__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 1px;
+    background: var(--paper-dim);
+  }
+  .salt__media img {
+    position: absolute; inset: -6% -2%;
+    width: 104%; height: 112%;
+    object-fit: cover;
+    object-position: 50% 65%;
+    will-change: transform;
+  }
+  .salt__caption {
+    position: absolute; left: 0; bottom: -36px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+  .salt__copy { padding-block: 24px; }
+  .field-note {
+    margin-top: 40px;
+    padding: 22px 0 0;
+    border-top: 1px solid var(--rule);
+    font-family: var(--ff-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+  }
+  .field-note__head {
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    opacity: 0.55;
+    margin-bottom: 12px;
+  }
+  .field-note dl {
+    display: grid; grid-template-columns: max-content 1fr;
+    gap: 6px 18px; margin: 0;
+  }
+  .field-note dt { opacity: 0.55; }
+  .field-note dd { margin: 0; }
+
+  /* -------------------------------------------------------------------------
+     II — Stone (two-part pinned reveal)
+     ------------------------------------------------------------------------- */
+  .stone {
+    position: relative;
+    background: #0d0b08;
+    color: var(--paper);
+  }
+  .stone__pin {
+    position: relative;
+    height: 100vh; min-height: 600px;
+    overflow: hidden;
+  }
+  .stone__panel {
+    position: absolute; inset: 0;
+    overflow: hidden;
+  }
+  .stone__panel img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    will-change: transform;
+  }
+  .stone__panel--a img { object-position: 50% 50%; }
+  .stone__panel--b {
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
+  .stone__panel--b img { object-position: 50% 55%; }
+  .stone__panel__veil {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+  }
+  .stone__overlay {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 110px var(--grid-pad) 48px;
+    pointer-events: none;
+  }
+  .stone__title-wrap {
+    align-self: end;
+    display: grid; grid-template-columns: 1fr auto; align-items: end;
+    gap: 48px;
+  }
+  .stone__title {
+    font-family: var(--ff-display);
+    font-weight: 280;
+    font-size: clamp(72px, 14vw, 220px);
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+    margin: 0;
+    font-variation-settings: "opsz" 144, "SOFT" 20;
+  }
+  .stone__title em {
+    font-style: italic; font-weight: 320;
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+  }
+  .stone__slot {
+    max-width: 30ch;
+    text-align: right;
+    font-family: var(--ff-text);
+    font-style: italic;
+    font-size: clamp(15px, 1.1vw, 18px);
+    line-height: 1.5;
+    opacity: 0.86;
+  }
+  .stone__caption {
+    display: flex; gap: 24px; justify-content: space-between;
+    align-items: end;
+    border-top: 1px solid var(--rule-paper);
+    padding-top: 22px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .stone__caption .right { opacity: 0.6; }
+  .stone__caption .left  { display: flex; gap: 32px; }
+  .stone__caption .left span { opacity: 0.6; }
+  .stone__caption .left b { font-weight: 500; }
+
+  /* -------------------------------------------------------------------------
+     III — Color (Vinicunca)
+     ------------------------------------------------------------------------- */
+  .color {
+    position: relative;
+    background: #15110b;
+    color: var(--paper);
+    overflow: hidden;
+    padding: clamp(100px, 16vh, 200px) var(--grid-pad) clamp(120px, 18vh, 220px);
+  }
+  .color__inner {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    row-gap: clamp(48px, 8vh, 96px);
+  }
+  .color__head { display: grid; gap: 22px; }
+  .color__title {
+    font-family: var(--ff-display);
+    font-weight: 350;
+    font-size: clamp(54px, 9.5vw, 160px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    margin: 0;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+    text-transform: uppercase;
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: 0.22em;
+  }
+  .color__title .word {
+    display: inline-flex;
+  }
+  .color__title .ch {
+    display: inline-block;
+    will-change: font-variation-settings, transform;
+    font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 280;
+  }
+  .color__title .dot {
+    display: inline-block; width: 0.14em; height: 0.14em;
+    border-radius: 50%; background: var(--copper);
+    align-self: center;
+    margin: 0 0.25em;
+  }
+  .color__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    clip-path: inset(50% 12% 50% 12%);
+    will-change: clip-path;
+  }
+  .color__media img {
+    position: absolute; inset: -3%;
+    width: 106%; height: 106%;
+    object-fit: cover;
+    object-position: 50% 50%;
+    will-change: transform;
+  }
+  .color__copy {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr 1fr;
+    gap: clamp(20px, 3vw, 56px);
+    align-items: start;
+  }
+  .color__copy .dateline { grid-column: 1; }
+  .color__copy .lede { grid-column: 2; max-width: none; }
+  .color__copy .body-text { grid-column: 3; max-width: 32ch; }
+  .color__swatches {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .color__swatches > div {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .color__swatches .chip {
+    height: 38px; border-radius: 1px;
+    transform: scaleX(0); transform-origin: left center;
+    will-change: transform;
+  }
+  .color__swatches .label { opacity: 0.6; }
+
+  /* -------------------------------------------------------------------------
+     IV — Green (Cloud forest)
+     ------------------------------------------------------------------------- */
+  .green {
+    position: relative;
+    background: #050706;
+    color: var(--paper);
+    overflow: hidden;
+  }
+  .green__pin {
+    position: relative;
+    height: 100vh; min-height: 600px;
+    overflow: hidden;
+  }
+  .green__media {
+    position: absolute; inset: -6%;
+    background-image: url("assets/peru/05-cloud-forest.jpg");
+    background-size: cover; background-position: 50% 50%;
+    will-change: transform, filter, opacity;
+    filter: brightness(0.42) saturate(1.08);
+  }
+  .green__mist {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(120% 60% at 50% 30%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(180deg, rgba(8,12,8,0.6) 0%, rgba(8,12,8,0) 30%, rgba(8,12,8,0) 60%, rgba(0,0,0,0.85) 100%);
+    will-change: opacity, transform;
+  }
+  .green__overlay {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 110px var(--grid-pad) 56px;
+    z-index: 2;
+  }
+  .green__hgroup { align-self: end; max-width: 740px; }
+  .green__title {
+    font-family: var(--ff-display);
+    font-weight: 280;
+    font-size: clamp(72px, 13vw, 200px);
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+    margin: 18px 0 24px;
+    font-variation-settings: "opsz" 144, "SOFT" 60;
+  }
+  .green__title em {
+    font-style: italic; font-weight: 320;
+  }
+  .green__lede {
+    font-family: var(--ff-text);
+    font-style: italic;
+    font-size: clamp(18px, 1.6vw, 24px);
+    line-height: 1.5;
+    max-width: 36ch;
+  }
+  .green__foot {
+    display: flex; justify-content: space-between; align-items: end;
+    border-top: 1px solid var(--rule-paper);
+    padding-top: 22px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  /* -------------------------------------------------------------------------
+     V — Colophon
+     ------------------------------------------------------------------------- */
+  .colophon {
+    background: var(--paper);
+    color: var(--ink);
+    padding: clamp(120px, 18vh, 220px) var(--grid-pad) clamp(60px, 10vh, 120px);
+  }
+  .colophon__inner {
+    max-width: var(--max); margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(40px, 8vw, 120px);
+    border-top: 1px solid var(--rule);
+    padding-top: 64px;
+  }
+  .colophon__lead { display: grid; gap: 22px; }
+  .colophon h3 {
+    font-family: var(--ff-display);
+    font-weight: 320;
+    font-size: clamp(40px, 5vw, 76px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin: 0;
+    font-variation-settings: "opsz" 144, "SOFT" 40;
+  }
+  .colophon h3 em { font-style: italic; }
+  .colophon__lead p {
+    max-width: 38ch;
+    font-size: 17px;
+    line-height: 1.6;
+    opacity: 0.8;
+  }
+  .colophon__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .colophon__stats > div {
+    padding: 22px 4px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 16px;
+  }
+  .colophon__stats > div:nth-child(odd) { border-right: 1px solid var(--rule); padding-right: 22px; }
+  .colophon__stats > div:nth-child(even) { padding-left: 22px; }
+  .colophon__stats .k {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+  .colophon__stats .v {
+    font-family: var(--ff-display);
+    font-weight: 500;
+    font-size: clamp(22px, 2.4vw, 34px);
+    font-variation-settings: "opsz" 72, "SOFT" 30;
+    letter-spacing: -0.02em;
+  }
+  .colophon__foot {
+    max-width: var(--max);
+    margin: 80px auto 0;
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    display: flex; justify-content: space-between;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  /* -------------------------------------------------------------------------
+     Responsive
+     ------------------------------------------------------------------------- */
+  @media (max-width: 880px) {
+    .masthead nav { display: none; }
+    .salt__grid { grid-template-columns: 1fr; }
+    .salt__media { aspect-ratio: 4 / 5; }
+    .stone__title-wrap { grid-template-columns: 1fr; }
+    .stone__slot { text-align: left; }
+    .color__copy { grid-template-columns: 1fr; }
+    .color__copy .dateline,
+    .color__copy .lede,
+    .color__copy .body-text { grid-column: 1; max-width: 56ch; }
+    .color__swatches { grid-template-columns: repeat(3, 1fr); }
+    .colophon__inner { grid-template-columns: 1fr; }
+    .colophon__stats > div:nth-child(odd) { border-right: none; padding-right: 4px; }
+    .colophon__stats > div:nth-child(even) { padding-left: 4px; }
+  }
+
+  /* -------------------------------------------------------------------------
+     Motion safety
+     ------------------------------------------------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .reveal-word > span,
+    .reveal-line > span { transform: none !important; }
+    .stone__panel--b { clip-path: inset(0 0 0 0) !important; }
+    .color__media { clip-path: inset(0 0 0 0) !important; }
+    .green__media { filter: brightness(0.7) saturate(1.05) !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ──────────────────────────────────────────────────────────────────── -->
+<!-- Persistent UI                                                       -->
+<!-- ──────────────────────────────────────────────────────────────────── -->
+<div class="progress" aria-hidden="true"></div>
+<header class="masthead" role="banner">
+  <div class="logo">Andes <em>/</em> G</div>
+  <nav aria-label="Chapters">
+    <a href="#salt"   data-jump="salt">I · Salt</a>
+    <a href="#stone"  data-jump="stone">II · Stone</a>
+    <a href="#color"  data-jump="color">III · Color</a>
+    <a href="#green"  data-jump="green">IV · Green</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ─── 0 · Cover ─────────────────────────────────────────────────── -->
+  <section class="cover" id="cover" aria-label="Cover">
+    <div class="cover__bg" data-cover-bg></div>
+    <div class="cover__veil"></div>
+
+    <div class="cover__frame">
+      <div class="cover__hgroup">
+        <p class="cover__eyebrow">A photographic essay · 14 days · 2,840 km</p>
+        <h1 class="cover__title" data-cover-title>
+          <span class="row">Four thousand</span>
+          <span class="row">five hundred <em>metres</em></span>
+          <span class="row"><span class="num" data-altimeter aria-label="altitude"><span class="digit">0</span><span class="digit">,</span><span class="digit">0</span><span class="digit">0</span><span class="digit">0</span></span> <em>m</em></span>
+        </h1>
+        <p class="cover__sub">
+          A field study in latitude, light, and the Geländewagen — from the salt mirror of Uyuni
+          across the spine of the Andes, down into the green of the cloud forest.
+        </p>
+      </div>
+
+      <div class="cover__foot">
+        <div class="col">
+          <dl>
+            <div><dt>Filed</dt><dd>May 2026</dd></div>
+            <div><dt>Author</dt><dd>S. Scheller</dd></div>
+            <div><dt>Issue</dt><dd>№ 04</dd></div>
+          </dl>
+        </div>
+        <div class="scroll-cue">Scroll <span class="ln"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── I · Salt ──────────────────────────────────────────────────── -->
+  <section class="chapter salt" id="salt" aria-labelledby="salt-h">
+    <div class="salt__grid">
+      <figure class="salt__media" data-parallax data-parallax-amount="0.18">
+        <img src="assets/peru/01-salar.jpg" alt="A black Mercedes-Benz G-Class on the Salar de Uyuni at sunset, with the truck reflected in a thin film of water across the salt." />
+        <figcaption class="salt__caption">Plate 01 · Salar de Uyuni · 05:42</figcaption>
+      </figure>
+
+      <div class="salt__copy">
+        <p class="kicker">Chapter I</p>
+        <h2 class="chapter__title" id="salt-h" data-split-title>Salt.</h2>
+        <p class="dateline">−20.13° / −67.49° · Bolivia · day 02</p>
+
+        <p class="lede" data-split-lines>
+          <em>By dawn the lake has become a mirror.</em> Ten thousand square kilometres
+          of pressed crystal — and the truck looks like the only object in the world.
+        </p>
+
+        <p class="body-text body-text--lead" data-fade>
+          The salt is harder than it looks. A G&nbsp;500 leaves almost no print here;
+          the surface heals itself overnight, every footprint dissolved by morning
+          condensation that the wind freezes back into rind.
+        </p>
+        <p class="body-text" data-fade>
+          We&nbsp;drop the tyres to 1.6&nbsp;bar and drive straight — there are no
+          landmarks to drive towards, only the curvature of the earth, and a thin
+          orange seam where the Andes pretend to be a coast.
+        </p>
+
+        <div class="field-note" data-fade>
+          <div class="field-note__head">Field note · 02</div>
+          <dl>
+            <dt>Elev.</dt>     <dd>3,656 m</dd>
+            <dt>Temp.</dt>     <dd>−4 °C at sunrise · 17 °C at noon</dd>
+            <dt>Tyres</dt>     <dd>1.6 bar, all four</dd>
+            <dt>Fuel</dt>      <dd>62 L remaining · next station 184 km</dd>
+            <dt>Note</dt>      <dd>Carry water. There is no water.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── II · Stone (pinned two-panel reveal) ──────────────────────── -->
+  <section class="chapter stone" id="stone" aria-labelledby="stone-h">
+    <div class="stone__pin" data-stone-pin>
+
+      <div class="stone__panel stone__panel--a" data-stone-a>
+        <img src="assets/peru/02-sacred-valley.jpg" alt="An aerial view of the Pisac terraces in the Sacred Valley, with a white G-Class climbing the switchbacks." />
+        <div class="stone__panel__veil"></div>
+      </div>
+
+      <div class="stone__panel stone__panel--b" data-stone-b>
+        <img src="assets/peru/03-cusco.jpg" alt="A burgundy G-Class threading a narrow cobbled alley in Cusco, walled by Inca stonework and lit by a single overhead lantern." />
+        <div class="stone__panel__veil"></div>
+      </div>
+
+      <div class="stone__overlay">
+        <div class="stone__title-wrap">
+          <h2 class="stone__title" id="stone-h">
+            <span data-stone-word="stone">Stone.</span>
+            <span data-stone-word="walls" style="display:none">Walls.</span>
+          </h2>
+          <p class="stone__slot" data-stone-slot>
+            Six hundred years of agronomy carved into a hillside.
+            The roads that climb the terraces are narrower than the truck.
+            <em>Mostly.</em>
+          </p>
+        </div>
+
+        <div class="stone__caption">
+          <div class="left">
+            <span>Chapter II</span>
+            <b data-stone-loc>Pisac · Sacred Valley · 3,400 m</b>
+          </div>
+          <div class="right" data-stone-day>Day 05 · 16:08</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── III · Color (Vinicunca, clip-path + weight-morph) ─────────── -->
+  <section class="chapter color" id="color" aria-labelledby="color-h">
+    <div class="color__inner">
+
+      <div class="color__head">
+        <p class="kicker" style="color: var(--paper); opacity: 0.7">Chapter III</p>
+        <h2 class="color__title" id="color-h" data-color-title>
+          <span class="word"><span class="ch">R</span><span class="ch">o</span><span class="ch">j</span><span class="ch">o</span></span>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="word"><span class="ch">O</span><span class="ch">r</span><span class="ch">o</span></span>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="word"><span class="ch">V</span><span class="ch">e</span><span class="ch">r</span><span class="ch">d</span><span class="ch">e</span></span>
+        </h2>
+      </div>
+
+      <figure class="color__media" data-color-media>
+        <img src="assets/peru/04-vinicunca.jpg" alt="A silver G-Class on the dirt road approaching Vinicunca, the Rainbow Mountain, with banded mineral slopes filling the horizon." />
+      </figure>
+
+      <div class="color__copy">
+        <p class="dateline" style="color: var(--paper); opacity: 0.7">
+          Vinicunca · 5,036 m<br/>day 08 · 11:20
+        </p>
+        <p class="lede" data-fade>
+          A geology lesson written in <em>iron</em>, <em>copper</em>, and <em>sulphur</em>.
+          The thin air bends light at this altitude — everything looks slightly more
+          saturated than it actually is.
+        </p>
+        <div class="body-text" data-fade style="opacity: 0.7">
+          Up here the engine drinks 30% more fuel and the body wants twice as much oxygen
+          as it gets. You stop talking. You walk slowly. You photograph carefully.
+        </div>
+
+        <div class="color__swatches" data-color-swatches>
+          <div><span class="chip" style="background:#9c3a2a"></span><span class="label">Hematite · #9C3A2A</span></div>
+          <div><span class="chip" style="background:#c47b3a"></span><span class="label">Limonite · #C47B3A</span></div>
+          <div><span class="chip" style="background:#d6b87a"></span><span class="label">Sulphur · #D6B87A</span></div>
+          <div><span class="chip" style="background:#5e6b46"></span><span class="label">Chlorite · #5E6B46</span></div>
+          <div><span class="chip" style="background:#3c5876"></span><span class="label">Cobalt · #3C5876</span></div>
+          <div><span class="chip" style="background:#2a2926"></span><span class="label">Magnetite · #2A2926</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── IV · Green (Cloud forest, mist lift) ──────────────────────── -->
+  <section class="chapter green" id="green" aria-labelledby="green-h">
+    <div class="green__pin" data-green-pin>
+      <div class="green__media" data-green-media></div>
+      <div class="green__mist" data-green-mist></div>
+
+      <div class="green__overlay">
+        <div class="green__hgroup">
+          <p class="kicker" style="color: var(--paper); opacity: 0.75">Chapter IV</p>
+          <h2 class="green__title" id="green-h" data-split-title>Green.</h2>
+          <p class="green__lede" data-split-lines>
+            Down the eastern slope of the Andes the air thickens. Mud takes the place
+            of salt. Every leaf is dripping, and the truck&nbsp;— for the first time in
+            ten days&nbsp;— looks small.
+          </p>
+        </div>
+
+        <div class="green__foot">
+          <span>Manú cloud forest · 1,840 m</span>
+          <span>−12.27° / −71.41° · day 11</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── V · Colophon ──────────────────────────────────────────────── -->
+  <footer class="colophon">
+    <div class="colophon__inner">
+      <div class="colophon__lead">
+        <p class="kicker">End of file</p>
+        <h3>The Geländewagen <em>across</em> the central Andes.</h3>
+        <p>
+          A photographic essay made on the road between the Salar de Uyuni and
+          the cloud forest of Manú. Two cameras, one truck, four chapters, and
+          a great deal of bottled water.
+        </p>
+      </div>
+
+      <div class="colophon__stats" data-stats>
+        <div><span class="k">Distance</span><span class="v">2,840 km</span></div>
+        <div><span class="k">Days</span><span class="v">14</span></div>
+        <div><span class="k">Elev. gain</span><span class="v">12,600 m</span></div>
+        <div><span class="k">High point</span><span class="v">5,036 m</span></div>
+        <div><span class="k">Low temp</span><span class="v">−9 °C</span></div>
+        <div><span class="k">Frames</span><span class="v">2,114</span></div>
+      </div>
+    </div>
+
+    <div class="colophon__foot">
+      <span>Andes / G · № 04</span>
+      <span>Set in Fraunces &amp; Newsreader</span>
+      <span>© S. Scheller · 2026</span>
+    </div>
+  </footer>
+
+</main>
+
+<!-- ──────────────────────────────────────────────────────────────────── -->
+<!-- Libraries                                                           -->
+<!-- ──────────────────────────────────────────────────────────────────── -->
+<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ──────────────────────────────────────────────────────────────────
+     Lenis smooth scroll ↔ GSAP ScrollTrigger bridge
+     ────────────────────────────────────────────────────────────────── */
+  let lenis = null;
+  if (!reduce && window.Lenis) {
+    lenis = new Lenis({
+      duration: 1.15,
+      easing: t => 1 - Math.pow(1 - t, 3),
+      smoothWheel: true,
+      smoothTouch: false,
+      wheelMultiplier: 0.9,
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(time => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     Word / line splitter (no SplitText dep)
+     ────────────────────────────────────────────────────────────────── */
+  function splitTitleByWord(node) {
+    const text = node.textContent.trim();
+    node.textContent = '';
+    text.split(/(\s+)/).forEach(part => {
+      if (/^\s+$/.test(part)) {
+        node.appendChild(document.createTextNode(' '));
+      } else {
+        const wrap = document.createElement('span');
+        wrap.className = 'reveal-word';
+        const inner = document.createElement('span');
+        inner.textContent = part;
+        wrap.appendChild(inner);
+        node.appendChild(wrap);
+      }
+    });
+  }
+
+  // Wrap each word (across nested inline tags) in an inline-block span,
+  // then group spans by offsetTop into lines. Tag-safe.
+  function splitParagraphByLine(node) {
+    // 1. collect text nodes (skip whitespace-only)
+    const textNodes = [];
+    (function walk(n) {
+      n.childNodes.forEach(c => {
+        if (c.nodeType === 3) {
+          if (c.textContent.trim()) textNodes.push(c);
+        } else if (c.nodeType === 1) {
+          walk(c);
+        }
+      });
+    })(node);
+
+    // 2. wrap each word in <span class="__w">, preserving the inline tags
+    //    around it (a word inside <em> stays inside <em>)
+    const wordSpans = [];
+    textNodes.forEach(tn => {
+      const parts = tn.textContent.split(/(\s+)/);
+      const frag = document.createDocumentFragment();
+      parts.forEach(p => {
+        if (p === '') return;
+        if (/^\s+$/.test(p)) {
+          frag.appendChild(document.createTextNode(p));
+        } else {
+          const w = document.createElement('span');
+          w.className = '__w';
+          w.textContent = p;
+          frag.appendChild(w);
+          wordSpans.push(w);
+        }
+      });
+      tn.parentNode.replaceChild(frag, tn);
+    });
+
+    // 3. compute line groups by offsetTop
+    const tops = wordSpans.map(w => w.offsetTop);
+    const lineOfWord = [];
+    let lineIdx = -1, lastTop = -Infinity;
+    tops.forEach(top => {
+      if (top - lastTop > 2) { lineIdx++; lastTop = top; }
+      lineOfWord.push(lineIdx);
+    });
+
+    // 4. wrap each word in a mask (overflow:hidden) and a translate inner.
+    //    The CSS animation translates the inner via GSAP.
+    wordSpans.forEach((w, i) => {
+      w.dataset.line = lineOfWord[i];
+      // turn <span class="__w">text</span> into
+      // <span class="reveal-word"><span>text</span></span>
+      const text = w.textContent;
+      w.className = 'reveal-word';
+      w.textContent = '';
+      const inner = document.createElement('span');
+      inner.textContent = text;
+      w.appendChild(inner);
+    });
+
+    node.__words = wordSpans;
+    node.__lines = lineIdx + 1;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     0 — Cover
+     ────────────────────────────────────────────────────────────────── */
+  function initCover() {
+    const cover = document.querySelector('.cover');
+    if (!cover) return;
+    const bg = cover.querySelector('[data-cover-bg]');
+    const title = cover.querySelector('[data-cover-title]');
+
+    // split rows into reveal-word spans
+    title.querySelectorAll('.row').forEach(row => {
+      // wrap entire row content in a reveal mask
+      const html = row.innerHTML;
+      const wrap = document.createElement('span');
+      wrap.className = 'reveal-word';
+      wrap.style.display = 'block';
+      const inner = document.createElement('span');
+      inner.style.display = 'block';
+      inner.innerHTML = html;
+      wrap.appendChild(inner);
+      row.innerHTML = '';
+      row.appendChild(wrap);
+    });
+
+    // entrance
+    const intro = gsap.timeline({ delay: 0.15 });
+    intro.from(title.querySelectorAll('.reveal-word > span'), {
+      yPercent: 110,
+      duration: 1.05,
+      ease: 'expo.out',
+      stagger: 0.085,
+    });
+    intro.from('.cover__eyebrow, .cover__sub, .cover__foot', {
+      y: 24, opacity: 0,
+      duration: 0.9, ease: 'expo.out', stagger: 0.08,
+    }, '-=0.7');
+
+    // altimeter count-up
+    const altimeterTarget = 4505;
+    const altimeterNode = title.querySelector('[data-altimeter]');
+    if (altimeterNode) {
+      const fmt = (n) => Math.round(n).toLocaleString('en-US');
+      const fill = (text) => {
+        altimeterNode.innerHTML = text.split('').map(c =>
+          `<span class="digit">${c}</span>`
+        ).join('');
+      };
+      gsap.to({ v: 0 }, {
+        v: altimeterTarget,
+        duration: 2.6, delay: 0.6, ease: 'power2.out',
+        onUpdate: function () { fill(fmt(this.targets()[0].v)); },
+      });
+    }
+
+    // parallax + zoom on scroll
+    if (!reduce) {
+      gsap.to(bg, {
+        scale: 1.12,
+        yPercent: 8,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: cover,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.6,
+        },
+      });
+      gsap.to('.cover__frame', {
+        yPercent: -20,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: cover,
+          start: 'top top',
+          end: 'bottom 30%',
+          scrub: 0.6,
+        },
+      });
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     I — Salt
+     ────────────────────────────────────────────────────────────────── */
+  function initSalt() {
+    const salt = document.querySelector('.salt');
+    if (!salt) return;
+
+    // title split
+    const title = salt.querySelector('[data-split-title]');
+    if (title) splitTitleByWord(title);
+
+    // lede split by lines (after fonts ready — wrap timing matters)
+    const ready = (document.fonts && document.fonts.ready) || Promise.resolve();
+    ready.then(() => {
+      salt.querySelectorAll('[data-split-lines]').forEach(splitParagraphByLine);
+      mountSaltAnims();
+      ScrollTrigger.refresh();
+    });
+
+    function mountSaltAnims() {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: salt,
+          start: 'top 78%',
+          end: 'top 18%',
+          toggleActions: 'play none none reverse',
+        },
+      });
+
+      tl.from(salt.querySelectorAll('.kicker, .dateline'), {
+        opacity: 0, y: 14, duration: 0.7, ease: 'expo.out', stagger: 0.06,
+      });
+      tl.from(salt.querySelectorAll('[data-split-title] .reveal-word > span'), {
+        yPercent: 110, duration: 0.9, ease: 'expo.out', stagger: 0.05,
+      }, '-=0.55');
+      tl.from(salt.querySelectorAll('[data-split-lines] .reveal-word > span'), {
+        yPercent: 110, duration: 0.85, ease: 'expo.out',
+        // stagger by line — words on the same line rise together
+        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.12,
+      }, '-=0.6');
+      tl.from(salt.querySelectorAll('[data-fade]'), {
+        opacity: 0, y: 24, duration: 0.8, ease: 'power3.out', stagger: 0.1,
+      }, '-=0.4');
+
+      // image parallax
+      const img = salt.querySelector('.salt__media img');
+      if (img && !reduce) {
+        gsap.fromTo(img, { yPercent: -6 }, {
+          yPercent: 6,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: salt,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        });
+      }
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     II — Stone (pinned, two-panel reveal)
+     ────────────────────────────────────────────────────────────────── */
+  function initStone() {
+    const stone = document.querySelector('.stone');
+    if (!stone) return;
+    const pin = stone.querySelector('[data-stone-pin]');
+    const panelA = stone.querySelector('[data-stone-a]');
+    const panelB = stone.querySelector('[data-stone-b]');
+    const imgA = panelA.querySelector('img');
+    const imgB = panelB.querySelector('img');
+    const slot = stone.querySelector('[data-stone-slot]');
+    const wordStone = stone.querySelector('[data-stone-word="stone"]');
+    const wordWalls = stone.querySelector('[data-stone-word="walls"]');
+    const loc = stone.querySelector('[data-stone-loc]');
+    const day = stone.querySelector('[data-stone-day]');
+
+    // intro reveal
+    gsap.from(panelA, {
+      scale: 1.12, opacity: 0,
+      duration: 1.4, ease: 'expo.out',
+      scrollTrigger: { trigger: stone, start: 'top 70%' },
+    });
+    gsap.from([wordStone, slot], {
+      yPercent: 12, opacity: 0,
+      duration: 1.0, ease: 'expo.out', stagger: 0.1,
+      scrollTrigger: { trigger: stone, start: 'top 60%' },
+    });
+
+    if (reduce) return;
+
+    // pinned timeline: scrub through the transition
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: pin,
+        start: 'top top',
+        end: '+=180%',
+        pin: true,
+        scrub: 0.8,
+        anticipatePin: 1,
+      },
+    });
+
+    // Phase 1: gentle parallax on A
+    tl.to(imgA, { scale: 1.08, yPercent: -4, ease: 'none' }, 0);
+
+    // Phase 2: B clip-path slides up over A
+    tl.to(panelB, {
+      clipPath: 'inset(0% 0 0 0)',
+      duration: 1,
+      ease: 'power2.inOut',
+    }, 0.35);
+    tl.fromTo(imgB,
+      { scale: 1.16, yPercent: 4 },
+      { scale: 1.0, yPercent: 0, ease: 'none', duration: 1 },
+      0.35
+    );
+
+    // Phase 3: crossfade type
+    tl.to(wordStone, { opacity: 0, yPercent: -10, duration: 0.4, ease: 'power2.in' }, 0.55);
+    tl.fromTo(wordWalls,
+      { opacity: 0, yPercent: 14, display: 'inline-block' },
+      { opacity: 1, yPercent: 0, duration: 0.5, ease: 'expo.out' },
+      0.62);
+    tl.to(slot, { opacity: 0, y: -10, duration: 0.35 }, 0.55);
+    tl.call(() => {
+      slot.innerHTML = 'An alley that was a wall before it was a street. The G turns its shoulders to fit. <em>Just.</em>';
+      loc.textContent = 'Cusco · 3,399 m';
+      day.textContent = 'Day 06 · 18:42';
+    }, [], 0.62);
+    tl.fromTo(slot, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45, ease: 'expo.out' }, 0.66);
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     III — Color (Vinicunca)
+     ────────────────────────────────────────────────────────────────── */
+  function initColor() {
+    const color = document.querySelector('.color');
+    if (!color) return;
+    const title = color.querySelector('[data-color-title]');
+    const media = color.querySelector('[data-color-media]');
+    const chars = title ? title.querySelectorAll('.ch') : [];
+    const chips = color.querySelectorAll('[data-color-swatches] .chip');
+
+    // intro: characters drop in
+    gsap.from(chars, {
+      yPercent: 110, opacity: 0,
+      duration: 1.0, ease: 'expo.out', stagger: 0.025,
+      scrollTrigger: { trigger: color, start: 'top 70%' },
+    });
+
+    // weight + soft morph driven by scroll
+    if (!reduce) {
+      ScrollTrigger.create({
+        trigger: color,
+        start: 'top 80%',
+        end: 'bottom 20%',
+        scrub: 0.6,
+        onUpdate(self) {
+          const p = self.progress; // 0..1
+          chars.forEach((ch, i) => {
+            const phase = (p + i * 0.03) % 1;
+            const wght = 240 + Math.sin(phase * Math.PI) * 460;
+            const soft = 20 + Math.sin((phase + 0.3) * Math.PI) * 80;
+            ch.style.fontVariationSettings =
+              `"opsz" 144, "SOFT" ${soft.toFixed(0)}, "wght" ${wght.toFixed(0)}`;
+          });
+        },
+      });
+
+      // clip-path reveal of the image
+      gsap.to(media, {
+        clipPath: 'inset(0% 0% 0% 0%)',
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: media,
+          start: 'top 78%',
+          end: 'top 25%',
+          scrub: 0.8,
+        },
+      });
+      gsap.fromTo(media.querySelector('img'),
+        { scale: 1.18 },
+        {
+          scale: 1.0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: media,
+            start: 'top 78%',
+            end: 'bottom top',
+            scrub: 0.8,
+          },
+        }
+      );
+    } else {
+      media.style.clipPath = 'inset(0 0 0 0)';
+    }
+
+    // body fade + swatches
+    gsap.from(color.querySelectorAll('[data-fade]'), {
+      opacity: 0, y: 22,
+      duration: 0.9, ease: 'power3.out', stagger: 0.1,
+      scrollTrigger: { trigger: color, start: 'top 55%' },
+    });
+    gsap.to(chips, {
+      scaleX: 1,
+      duration: 0.9, ease: 'expo.out', stagger: 0.08,
+      scrollTrigger: { trigger: '[data-color-swatches]', start: 'top 85%' },
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     IV — Green (mist lift)
+     ────────────────────────────────────────────────────────────────── */
+  function initGreen() {
+    const green = document.querySelector('.green');
+    if (!green) return;
+    const pin = green.querySelector('[data-green-pin]');
+    const media = green.querySelector('[data-green-media]');
+    const mist = green.querySelector('[data-green-mist]');
+    const title = green.querySelector('[data-split-title]');
+    const lede = green.querySelector('[data-split-lines]');
+
+    if (title) splitTitleByWord(title);
+
+    const ready = (document.fonts && document.fonts.ready) || Promise.resolve();
+    ready.then(() => {
+      if (lede) splitParagraphByLine(lede);
+      mount();
+      ScrollTrigger.refresh();
+    });
+
+    function mount() {
+      // intro
+      gsap.from(green.querySelectorAll('[data-split-title] .reveal-word > span'), {
+        yPercent: 110, duration: 1.0, ease: 'expo.out', stagger: 0.06,
+        scrollTrigger: { trigger: green, start: 'top 65%' },
+      });
+      gsap.from(green.querySelectorAll('[data-split-lines] .reveal-word > span'), {
+        yPercent: 110, duration: 0.9, ease: 'expo.out',
+        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.14,
+        scrollTrigger: { trigger: green, start: 'top 55%' },
+      });
+      gsap.from(green.querySelectorAll('.kicker, .green__foot'), {
+        opacity: 0, y: 18, duration: 0.8, ease: 'power3.out', stagger: 0.08,
+        scrollTrigger: { trigger: green, start: 'top 55%' },
+      });
+
+      if (reduce) return;
+
+      // mist lift + image brighten as we scroll through
+      ScrollTrigger.create({
+        trigger: pin,
+        start: 'top top',
+        end: '+=120%',
+        pin: true,
+        scrub: 0.6,
+        animation: gsap.timeline()
+          .to(media, { filter: 'brightness(0.78) saturate(1.04)', scale: 1.06, ease: 'none' }, 0)
+          .to(mist, { opacity: 0.4, yPercent: -10, ease: 'none' }, 0),
+      });
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     V — Colophon
+     ────────────────────────────────────────────────────────────────── */
+  function initColophon() {
+    const co = document.querySelector('.colophon');
+    if (!co) return;
+
+    gsap.from(co.querySelectorAll('.colophon__lead > *'), {
+      opacity: 0, y: 22, duration: 0.9, ease: 'power3.out', stagger: 0.08,
+      scrollTrigger: { trigger: co, start: 'top 75%' },
+    });
+    gsap.from(co.querySelectorAll('[data-stats] > div'), {
+      opacity: 0, y: 22, duration: 0.7, ease: 'power3.out', stagger: 0.06,
+      scrollTrigger: { trigger: '[data-stats]', start: 'top 80%' },
+    });
+    gsap.from(co.querySelector('.colophon__foot'), {
+      opacity: 0, y: 14, duration: 0.7, ease: 'power3.out',
+      scrollTrigger: { trigger: co, start: 'top 40%' },
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     Progress bar & nav-active tracking
+     ────────────────────────────────────────────────────────────────── */
+  function initChrome() {
+    const bar = document.querySelector('.progress');
+    ScrollTrigger.create({
+      start: 0,
+      end: 'max',
+      onUpdate(self) {
+        bar.style.setProperty('--p', (self.progress * 100).toFixed(2) + '%');
+      },
+    });
+
+    // nav active state by chapter in viewport
+    const ids = ['salt', 'stone', 'color', 'green'];
+    ids.forEach(id => {
+      const sect = document.getElementById(id);
+      const link = document.querySelector(`[data-jump="${id}"]`);
+      if (!sect || !link) return;
+      ScrollTrigger.create({
+        trigger: sect,
+        start: 'top 55%',
+        end: 'bottom 45%',
+        onToggle: self => {
+          if (self.isActive) {
+            document.querySelectorAll('[data-jump]').forEach(a => a.removeAttribute('data-active'));
+            link.setAttribute('data-active', '');
+          }
+        },
+      });
+    });
+
+    // nav click → lenis scrollTo
+    document.querySelectorAll('[data-jump]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const id = a.getAttribute('data-jump');
+        const t = document.getElementById(id);
+        if (!t) return;
+        if (lenis) lenis.scrollTo(t, { offset: -8, duration: 1.2 });
+        else t.scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+
+    // keyboard 1..5 jumps
+    const slots = ['cover', 'salt', 'stone', 'color', 'green'];
+    document.addEventListener('keydown', e => {
+      const n = parseInt(e.key, 10);
+      if (!n || n < 1 || n > slots.length) return;
+      const t = document.getElementById(slots[n - 1]);
+      if (!t) return;
+      if (lenis) lenis.scrollTo(t, { duration: 1.2 });
+      else t.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
+     Boot
+     ────────────────────────────────────────────────────────────────── */
+  function boot() {
+    initCover();
+    initSalt();
+    initStone();
+    initColor();
+    initGreen();
+    initColophon();
+    initChrome();
+
+    // ScrollTrigger refresh once images are in
+    const imgs = Array.from(document.images);
+    let pending = imgs.length;
+    if (pending === 0) ScrollTrigger.refresh();
+    else imgs.forEach(img => {
+      if (img.complete) settle();
+      else { img.addEventListener('load', settle); img.addEventListener('error', settle); }
+    });
+    function settle() { if (--pending <= 0) ScrollTrigger.refresh(); }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+</body>
+</html>
