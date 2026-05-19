@@ -1072,8 +1072,69 @@
   }
 
   /* -------------------------------------------------------------------------
-     Responsive
+     Polish layer — Mercedes-editorial signature moves
      ------------------------------------------------------------------------- */
+
+  /* (1) Chapter edge rules + monogram indices — drawn on entry */
+  .chapter-edge {
+    position: absolute;
+    left: var(--grid-pad); right: var(--grid-pad);
+    display: flex; align-items: center; gap: 14px;
+    pointer-events: none;
+    z-index: 25;
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: inherit;
+  }
+  .chapter-edge--top { top: 14px; }
+  .chapter-edge--bot { bottom: 14px; }
+  .chapter-edge__idx,
+  .chapter-edge__label {
+    opacity: 0;
+    transform: translateY(3px);
+    will-change: opacity, transform;
+    white-space: nowrap;
+  }
+  .chapter-edge__rule {
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.22;
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+  }
+  /* Full-bleed sections need slightly heavier rules to stay visible over imagery */
+  .stone .chapter-edge__rule,
+  .encounter .chapter-edge__rule,
+  .descent .chapter-edge__rule,
+  .green .chapter-edge__rule,
+  .cover .chapter-edge__rule { opacity: 0.32; }
+  .stone .chapter-edge,
+  .encounter .chapter-edge,
+  .descent .chapter-edge,
+  .green .chapter-edge,
+  .cover .chapter-edge { z-index: 35; }
+
+  /* (2) Cinematic letterbox bars — slide in/out around full-bleed pinned plates */
+  .letterbox {
+    position: absolute; left: 0; right: 0;
+    height: clamp(36px, 5.5vh, 64px);
+    background: #000;
+    z-index: 4;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .letterbox--top { top: 0; transform: translateY(-101%); }
+  .letterbox--bot { bottom: 0; transform: translateY(101%); }
+
+  /* (3) Section recede — full-bleed chapters scale down + dim as they exit */
+  .recede-host { will-change: transform, filter; }
+
+  /* (5) Type-locked crops use object-position scrubs; nothing to declare here,
+        but allow GSAP to animate it freely via inline style overrides. */
   @media (max-width: 880px) {
     .masthead nav { display: none; }
     .salt__grid { grid-template-columns: 1fr; }
@@ -1111,6 +1172,10 @@
     .water__plate--mirror { clip-path: inset(0 0 0 0) !important; }
     .descent__media img { transform: scale(1) !important; }
     .descent__counter { opacity: 1 !important; transform: none !important; }
+    .chapter-edge__idx,
+    .chapter-edge__label { opacity: 0.7 !important; transform: none !important; }
+    .chapter-edge__rule { transform: scaleX(1) !important; }
+    .letterbox { transform: translateY(-200%) !important; }
   }
 </style>
 </head>
@@ -2395,6 +2460,194 @@
   }
 
   /* ──────────────────────────────────────────────────────────────────
+     Polish layer — five Mercedes-editorial signature moves layered on top
+     ────────────────────────────────────────────────────────────────── */
+  function initPolish() {
+
+    // (1) Chapter edges: top + bottom hairlines + mono index labels per section
+    const edgeSections = [
+      { sel: '.salt',      idx: '01',   label: 'I — Salt' },
+      { sel: '.water',     idx: '01.b', label: 'Bridge — Water' },
+      { sel: '.stone',     idx: '02',   label: 'II — Stone' },
+      { sel: '.encounter', idx: '02.b', label: 'Bridge — Encounter' },
+      { sel: '.color',     idx: '03',   label: 'III — Color' },
+      { sel: '.descent',   idx: '03.b', label: 'Bridge — Descent' },
+      { sel: '.green',     idx: '04',   label: 'IV — Green' },
+    ];
+
+    edgeSections.forEach(({ sel, idx, label }) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const cs = getComputedStyle(el);
+      if (cs.position === 'static') el.style.position = 'relative';
+
+      const top = document.createElement('div');
+      top.className = 'chapter-edge chapter-edge--top';
+      top.innerHTML =
+        `<span class="chapter-edge__idx">${idx}</span>` +
+        `<span class="chapter-edge__rule"></span>` +
+        `<span class="chapter-edge__label">${label}</span>`;
+      el.appendChild(top);
+
+      const bot = document.createElement('div');
+      bot.className = 'chapter-edge chapter-edge--bot';
+      bot.innerHTML = `<span class="chapter-edge__rule"></span>`;
+      el.appendChild(bot);
+
+      const tlIn = gsap.timeline({
+        scrollTrigger: { trigger: el, start: 'top 88%' },
+      });
+      tlIn.to(top.querySelector('.chapter-edge__rule'), {
+        scaleX: 1, duration: 0.9, ease: 'expo.out',
+      });
+      tlIn.to([top.querySelector('.chapter-edge__idx'), top.querySelector('.chapter-edge__label')], {
+        opacity: 0.7, y: 0, duration: 0.5, ease: 'expo.out', stagger: 0.08,
+      }, '-=0.55');
+
+      gsap.to(bot.querySelector('.chapter-edge__rule'), {
+        scaleX: 1, duration: 1.0, ease: 'expo.out',
+        scrollTrigger: { trigger: el, start: 'bottom 92%' },
+      });
+    });
+
+    // (2) Cinematic letterbox bars — slide in/out around pinned full-bleed plates
+    const pinned = ['.stone__pin', '.encounter__pin', '.descent__pin', '.green__pin'];
+    pinned.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      const top = document.createElement('div');
+      top.className = 'letterbox letterbox--top';
+      const bot = document.createElement('div');
+      bot.className = 'letterbox letterbox--bot';
+      el.appendChild(top);
+      el.appendChild(bot);
+
+      if (reduce) return;
+
+      gsap.set([top, bot], { yPercent: (i) => i === 0 ? -101 : 101 });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 90%',
+          end: 'bottom 10%',
+          scrub: 0.6,
+        },
+      });
+      // slide in early, hold across the middle, slide out near the end
+      tl.to(top, { yPercent: 0, ease: 'power2.out', duration: 0.14 }, 0.00);
+      tl.to(bot, { yPercent: 0, ease: 'power2.out', duration: 0.14 }, 0.00);
+      tl.to(top, { yPercent: 0, ease: 'none',       duration: 0.66 }, 0.14);
+      tl.to(bot, { yPercent: 0, ease: 'none',       duration: 0.66 }, 0.14);
+      tl.to(top, { yPercent: -101, ease: 'power2.in', duration: 0.18 }, 0.82);
+      tl.to(bot, { yPercent: 101,  ease: 'power2.in', duration: 0.18 }, 0.82);
+    });
+
+    if (reduce) return;
+
+    // (3) Section recede — outgoing full-bleed media scales down + dims (page-turn)
+    const recedeMap = [
+      { sel: '.salt__media',     trigger: '.salt'      },
+      { sel: '.water__mirror',   trigger: '.water'     },
+      { sel: '.stone__panel',    trigger: '.stone',    all: true },
+      { sel: '.encounter__plate',trigger: '.encounter' },
+      { sel: '.color__media',    trigger: '.color'     },
+      { sel: '.descent__media',  trigger: '.descent'   },
+      { sel: '.green__media',    trigger: '.green'     },
+    ];
+    recedeMap.forEach(({ sel, trigger, all }) => {
+      const els = all ? document.querySelectorAll(sel) : [document.querySelector(sel)];
+      els.forEach(el => {
+        if (!el) return;
+        el.classList.add('recede-host');
+        gsap.fromTo(el,
+          { scale: 1, filter: 'brightness(1)' },
+          {
+            scale: 0.94,
+            filter: 'brightness(0.55)',
+            ease: 'power2.in',
+            scrollTrigger: {
+              trigger,
+              start: 'bottom 70%',
+              end: 'bottom -10%',
+              scrub: 0.9,
+            },
+          }
+        );
+      });
+    });
+
+    // (4) Long pin-hold Ken-Burns — slow vertical drift on the encounter plate
+    //     pairs with the existing horizontal pan to give the plate genuine depth.
+    const encPlate = document.querySelector('[data-encounter-plate]');
+    if (encPlate) {
+      gsap.fromTo(encPlate,
+        { backgroundPositionY: '40%' },
+        {
+          backgroundPositionY: '62%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.encounter__pin',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.0,
+          },
+        }
+      );
+    }
+
+    // (5) Type-locked image crops — object-position scrubs across long scroll ranges
+    const saltImg = document.querySelector('.salt__media img');
+    if (saltImg) {
+      gsap.fromTo(saltImg,
+        { objectPosition: '50% 80%' },
+        {
+          objectPosition: '50% 28%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.salt',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 0.7,
+          },
+        }
+      );
+    }
+    const colorImg = document.querySelector('.color__media img');
+    if (colorImg) {
+      gsap.fromTo(colorImg,
+        { objectPosition: '50% 38%' },
+        {
+          objectPosition: '50% 62%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.color',
+            start: 'top 70%',
+            end: 'bottom top',
+            scrub: 0.8,
+          },
+        }
+      );
+    }
+    const greenMedia = document.querySelector('[data-green-media]');
+    if (greenMedia) {
+      gsap.fromTo(greenMedia,
+        { backgroundPositionY: '38%' },
+        {
+          backgroundPositionY: '62%',
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.green__pin',
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: 1.0,
+          },
+        }
+      );
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
      Boot
      ────────────────────────────────────────────────────────────────── */
   function boot() {
@@ -2409,6 +2662,7 @@
     initGreen();
     initColophon();
     initChrome();
+    initPolish();
 
     // ScrollTrigger refresh once images are in
     const imgs = Array.from(document.images);
