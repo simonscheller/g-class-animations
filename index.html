@@ -1654,12 +1654,10 @@
 
     // entrance
     const intro = gsap.timeline({ delay: 0.15 });
-    intro.from(title.querySelectorAll('.reveal-word > span'), {
-      yPercent: 110,
-      duration: 1.05,
-      ease: 'expo.out',
-      stagger: 0.085,
-    });
+    intro.fromTo(title.querySelectorAll('.reveal-word > span'),
+      { yPercent: 110 },
+      { yPercent: 0, duration: 1.05, ease: 'expo.out', stagger: 0.085 }
+    );
     intro.from('.cover__eyebrow, .cover__sub, .cover__foot', {
       y: 24, opacity: 0,
       duration: 0.9, ease: 'expo.out', stagger: 0.08,
@@ -1682,45 +1680,55 @@
       });
     }
 
-    // scroll handoff: cover pins briefly, BG zooms hard and desaturates,
-    // a paper-coloured "salt curtain" rises from below to wipe over the image
+    // scroll handoff: gentler ken-burns + slow fade, no pin (the pin was
+    // creating a confusing 110vh "gray middle" mid-scroll). The salt curtain
+    // is kept but only completes near the very end of the cover's natural scroll.
     if (!reduce) {
       const curtain = cover.querySelector('[data-cover-curtain]');
 
-      const handoff = gsap.timeline({
+      // BG: gentle ken-burns + mild dim — no aggressive desaturation
+      gsap.to(bg, {
+        scale: 1.18,
+        yPercent: 8,
+        filter: 'saturate(0.85) brightness(0.78)',
+        ease: 'none',
         scrollTrigger: {
           trigger: cover,
           start: 'top top',
-          end: '+=110%',
-          scrub: 0.7,
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
+          end: 'bottom top',
+          scrub: 0.6,
         },
       });
 
-      // BG: deep zoom + drift + drain saturation + dim
-      handoff.to(bg, {
-        scale: 1.42,
-        yPercent: 14,
-        filter: 'saturate(0.35) brightness(0.55) contrast(1.05)',
-        ease: 'none',
-      }, 0);
-
-      // copy lifts and blurs out
-      handoff.to('.cover__frame', {
-        yPercent: -42,
+      // copy lifts and fades — no blur, no extreme yPercent
+      gsap.to('.cover__frame', {
+        yPercent: -16,
         opacity: 0,
-        filter: 'blur(6px)',
-        ease: 'power1.in',
-      }, 0);
+        ease: 'power2.in',
+        scrollTrigger: {
+          trigger: cover,
+          start: 'top top',
+          end: 'bottom 40%',
+          scrub: 0.6,
+        },
+      });
 
-      // curtain rises like a salt-flat horizon climbing the frame
-      handoff.fromTo(curtain,
-        { yPercent: 100 },
-        { yPercent: 0, ease: 'power2.inOut' },
-        0.25
-      );
+      // curtain rises only in the last third of the cover scroll
+      if (curtain) {
+        gsap.fromTo(curtain,
+          { yPercent: 100 },
+          {
+            yPercent: 0,
+            ease: 'power2.inOut',
+            scrollTrigger: {
+              trigger: cover,
+              start: 'top -30%',
+              end: 'bottom top',
+              scrub: 0.7,
+            },
+          }
+        );
+      }
     }
   }
 
@@ -1756,14 +1764,19 @@
       tl.from(salt.querySelectorAll('.kicker, .dateline'), {
         opacity: 0, y: 14, duration: 0.7, ease: 'expo.out', stagger: 0.06,
       });
-      tl.from(salt.querySelectorAll('[data-split-title] .reveal-word > span'), {
-        yPercent: 110, duration: 0.9, ease: 'expo.out', stagger: 0.05,
-      }, '-=0.55');
-      tl.from(salt.querySelectorAll('[data-split-lines] .reveal-word > span'), {
-        yPercent: 110, duration: 0.85, ease: 'expo.out',
-        // stagger by line — words on the same line rise together
-        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.12,
-      }, '-=0.6');
+      tl.fromTo(salt.querySelectorAll('[data-split-title] .reveal-word > span'),
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.9, ease: 'expo.out', stagger: 0.05 },
+        '-=0.55'
+      );
+      tl.fromTo(salt.querySelectorAll('[data-split-lines] .reveal-word > span'),
+        { yPercent: 110 },
+        {
+          yPercent: 0, duration: 0.85, ease: 'expo.out',
+          stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.12,
+        },
+        '-=0.6'
+      );
       tl.from(salt.querySelectorAll('[data-fade]'), {
         opacity: 0, y: 24, duration: 0.8, ease: 'power3.out', stagger: 0.1,
       }, '-=0.4');
@@ -1801,10 +1814,13 @@
       opacity: 0, y: 14, duration: 0.7, ease: 'expo.out', stagger: 0.06,
       scrollTrigger: { trigger: water, start: 'top 78%' },
     });
-    gsap.from(water.querySelectorAll('[data-split-title] .reveal-word > span'), {
-      yPercent: 110, duration: 0.9, ease: 'expo.out', stagger: 0.05,
-      scrollTrigger: { trigger: water, start: 'top 70%' },
-    });
+    gsap.fromTo(water.querySelectorAll('[data-split-title] .reveal-word > span'),
+      { yPercent: 110 },
+      {
+        yPercent: 0, duration: 0.9, ease: 'expo.out', stagger: 0.05,
+        scrollTrigger: { trigger: water, start: 'top 70%' },
+      }
+    );
     gsap.from(water.querySelectorAll('[data-fade]'), {
       opacity: 0, y: 22, duration: 0.9, ease: 'power3.out', stagger: 0.08,
       scrollTrigger: { trigger: water, start: 'top 55%' },
@@ -1891,15 +1907,21 @@
       tl.from(enc.querySelectorAll('.kicker'), {
         opacity: 0, y: 14, duration: 0.18, ease: 'power3.out',
       }, 0.05);
-      tl.from(titleSpans, {
-        yPercent: 110, duration: 0.35, ease: 'expo.out', stagger: 0.05,
-      }, 0.12);
+      tl.fromTo(titleSpans,
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.35, ease: 'expo.out', stagger: 0.05 },
+        0.12
+      );
 
       // lede line-grouped
-      tl.from(lineSpans, {
-        yPercent: 110, duration: 0.35, ease: 'expo.out',
-        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
-      }, 0.35);
+      tl.fromTo(lineSpans,
+        { yPercent: 110 },
+        {
+          yPercent: 0, duration: 0.35, ease: 'expo.out',
+          stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
+        },
+        0.35
+      );
 
       // foot strip locks in at end
       tl.from(enc.querySelectorAll('.encounter__foot'), {
@@ -1980,13 +2002,19 @@
       tl.from(des.querySelectorAll('.kicker'), {
         opacity: 0, y: 14, duration: 0.18, ease: 'power3.out',
       }, 0.10);
-      tl.from(titleSpans, {
-        yPercent: 110, duration: 0.35, ease: 'expo.out', stagger: 0.05,
-      }, 0.16);
-      tl.from(lineSpans, {
-        yPercent: 110, duration: 0.35, ease: 'expo.out',
-        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
-      }, 0.38);
+      tl.fromTo(titleSpans,
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.35, ease: 'expo.out', stagger: 0.05 },
+        0.16
+      );
+      tl.fromTo(lineSpans,
+        { yPercent: 110 },
+        {
+          yPercent: 0, duration: 0.35, ease: 'expo.out',
+          stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
+        },
+        0.38
+      );
     }
   }
 
@@ -2346,12 +2374,11 @@
       }, 0);
 
       // title chars climb in
-      tl.from(titleSpans, {
-        yPercent: 110,
-        duration: 0.35,
-        ease: 'expo.out',
-        stagger: 0.05,
-      }, 0.08);
+      tl.fromTo(titleSpans,
+        { yPercent: 110 },
+        { yPercent: 0, duration: 0.35, ease: 'expo.out', stagger: 0.05 },
+        0.08
+      );
 
       // kicker rises
       tl.from(green.querySelectorAll('.kicker'), {
@@ -2359,12 +2386,14 @@
       }, 0.05);
 
       // lede line-grouped reveal
-      tl.from(lineSpans, {
-        yPercent: 110,
-        duration: 0.4,
-        ease: 'expo.out',
-        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
-      }, 0.35);
+      tl.fromTo(lineSpans,
+        { yPercent: 110 },
+        {
+          yPercent: 0, duration: 0.4, ease: 'expo.out',
+          stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
+        },
+        0.35
+      );
 
       // coordinates panel slides up on the right
       if (coords) {
@@ -2545,35 +2574,28 @@
 
     if (reduce) return;
 
-    // (3) Section recede — outgoing full-bleed media scales down + dims (page-turn)
+    // (3) Section recede — outgoing media scales down subtly (page-turn).
+    //     No filter changes — they conflict with chapter-owned filter scrubs
+    //     (especially the green pin's filter animation). Sections whose media
+    //     already runs its own scale scrub (color, green) are skipped.
     const recedeMap = [
-      { sel: '.salt__media',     trigger: '.salt'      },
-      { sel: '.water__mirror',   trigger: '.water'     },
-      { sel: '.stone__panel',    trigger: '.stone',    all: true },
-      { sel: '.encounter__plate',trigger: '.encounter' },
-      { sel: '.color__media',    trigger: '.color'     },
-      { sel: '.descent__media',  trigger: '.descent'   },
-      { sel: '.green__media',    trigger: '.green'     },
+      { sel: '.salt__media',      trigger: '.salt'      },
+      { sel: '.water__mirror',    trigger: '.water'     },
+      { sel: '.encounter__plate', trigger: '.encounter' },
     ];
-    recedeMap.forEach(({ sel, trigger, all }) => {
-      const els = all ? document.querySelectorAll(sel) : [document.querySelector(sel)];
-      els.forEach(el => {
-        if (!el) return;
-        el.classList.add('recede-host');
-        gsap.fromTo(el,
-          { scale: 1, filter: 'brightness(1)' },
-          {
-            scale: 0.94,
-            filter: 'brightness(0.55)',
-            ease: 'power2.in',
-            scrollTrigger: {
-              trigger,
-              start: 'bottom 70%',
-              end: 'bottom -10%',
-              scrub: 0.9,
-            },
-          }
-        );
+    recedeMap.forEach(({ sel, trigger }) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      el.classList.add('recede-host');
+      gsap.to(el, {
+        scale: 0.97,
+        ease: 'none',
+        scrollTrigger: {
+          trigger,
+          start: 'bottom 60%',
+          end: 'bottom 0%',
+          scrub: 0.9,
+        },
       });
     });
 
