@@ -128,6 +128,25 @@
       linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.7) 100%);
     pointer-events: none;
   }
+  /* Salt curtain — rises from below to wipe over the cover image
+     during the cover-to-salt handoff. */
+  .cover__curtain {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 102%;
+    background: var(--paper);
+    transform: translateY(100%);
+    will-change: transform;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .cover__curtain::before {
+    content: "";
+    position: absolute; left: 0; right: 0; top: -1px;
+    height: 80px;
+    background: linear-gradient(180deg, rgba(241,236,225,0) 0%, var(--paper) 100%);
+    transform: translateY(-100%);
+  }
+  .cover__bg { will-change: transform, filter; }
   .cover__frame {
     position: absolute; inset: 0;
     display: grid;
@@ -348,6 +367,74 @@
   .field-note dd { margin: 0; }
 
   /* -------------------------------------------------------------------------
+     Interlude (Salt → Stone) — horizontal type marquee
+     ------------------------------------------------------------------------- */
+  .interlude {
+    position: relative;
+    background: var(--paper);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  .interlude__pin {
+    position: relative;
+    height: 100vh; min-height: 560px;
+    overflow: hidden;
+    display: flex; align-items: center;
+  }
+  .interlude__bg {
+    position: absolute; inset: 0;
+    background: var(--paper);
+    will-change: background-color;
+    z-index: 0;
+  }
+  .interlude__rail {
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+    font-family: var(--ff-display);
+    font-weight: 280;
+    font-size: clamp(110px, 22vw, 320px);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 280;
+    will-change: transform, color, font-variation-settings;
+    color: var(--ink);
+    padding-left: 18vw;
+    user-select: none;
+  }
+  .interlude__rail .ir-num {
+    font-variation-settings: "opsz" 144, "SOFT" 0, "wght" 500;
+    margin-right: 0.5em;
+    letter-spacing: -0.06em;
+  }
+  .interlude__rail .ir-word { margin-right: 0.42em; }
+  .interlude__rail .ir-word em {
+    font-style: italic;
+    font-variation-settings: "opsz" 144, "SOFT" 100, "wght" 320;
+  }
+  .interlude__rail .ir-sep,
+  .interlude__rail .ir-arrow {
+    display: inline-block;
+    margin: 0 0.32em;
+    opacity: 0.42;
+    font-weight: 300;
+  }
+  .interlude__meta {
+    position: absolute; left: var(--grid-pad); right: var(--grid-pad);
+    bottom: 32px;
+    z-index: 2;
+    display: flex; justify-content: space-between;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.55;
+    pointer-events: none;
+    will-change: color, opacity;
+  }
+
+  /* -------------------------------------------------------------------------
      II — Stone (two-part pinned reveal)
      ------------------------------------------------------------------------- */
   .stone {
@@ -372,10 +459,26 @@
   }
   .stone__panel--a img { object-position: 50% 50%; }
   .stone__panel--b {
-    clip-path: inset(100% 0 0 0);
-    will-change: clip-path;
+    /* slides in from the right: starts clipped to a zero-width strip on the right edge */
+    clip-path: inset(0 0 0 100%);
+    will-change: clip-path, transform;
   }
-  .stone__panel--b img { object-position: 50% 55%; }
+  .stone__panel--b img {
+    object-position: 50% 55%;
+    will-change: transform;
+  }
+  /* hairline that draws under the seam as B slides in */
+  .stone__seam {
+    position: absolute; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--paper);
+    opacity: 0;
+    transform: translateX(100vw);
+    will-change: transform, opacity;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: difference;
+  }
   .stone__panel__veil {
     position: absolute; inset: 0;
     background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 25%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
@@ -459,18 +562,42 @@
     gap: 0.22em;
   }
   .color__title .word {
+    position: relative;
     display: inline-flex;
+    /* per-word mineral colour, set inline per .word */
+    --mineral: #d6b87a;
+  }
+  .color__title .word .ch-wrap {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: baseline;
   }
   .color__title .ch {
     display: inline-block;
-    will-change: font-variation-settings, transform;
-    font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 280;
+    will-change: font-variation-settings, transform, color;
+    font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 220;
+    transform: translateY(108%);
+    color: var(--paper);
+  }
+  /* mineral underline — drawn under each word during its ignition */
+  .color__title .word .ul {
+    position: absolute;
+    left: 0; right: 0; bottom: -0.18em;
+    height: 0.08em;
+    background: var(--mineral);
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+    border-radius: 1px;
   }
   .color__title .dot {
     display: inline-block; width: 0.14em; height: 0.14em;
     border-radius: 50%; background: var(--copper);
     align-self: center;
     margin: 0 0.25em;
+    opacity: 0.5;
+    transform: scale(0.6);
+    will-change: transform, opacity;
   }
   .color__media {
     position: relative;
@@ -531,11 +658,40 @@
     overflow: hidden;
   }
   .green__media {
-    position: absolute; inset: -6%;
+    position: absolute; inset: -8%;
     background-image: url("assets/peru/05-cloud-forest.png");
     background-size: cover; background-position: 50% 50%;
     will-change: transform, filter, opacity;
-    filter: brightness(0.42) saturate(1.08);
+    filter: brightness(0.28) saturate(0.72) blur(8px);
+    transform: scale(1.02);
+  }
+  .green__coords {
+    position: absolute;
+    right: var(--grid-pad);
+    top: 30%;
+    z-index: 3;
+    font-family: var(--ff-mono);
+    font-size: clamp(11px, 0.95vw, 13px);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--paper);
+    text-align: right;
+    line-height: 2;
+    opacity: 0;
+    transform: translateY(20px);
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+  .green__coords b {
+    display: block;
+    font-family: var(--ff-display);
+    font-weight: 320;
+    font-size: clamp(34px, 4.4vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    font-variation-settings: "opsz" 144, "SOFT" 80;
+    margin: 6px 0 14px;
+    text-transform: none;
   }
   .green__mist {
     position: absolute; inset: 0;
@@ -686,9 +842,13 @@
     }
     .reveal-word > span,
     .reveal-line > span { transform: none !important; }
-    .stone__panel--b { clip-path: inset(0 0 0 0) !important; }
+    .stone__panel--b { clip-path: inset(0 0 0 0) !important; transform: none !important; }
     .color__media { clip-path: inset(0 0 0 0) !important; }
-    .green__media { filter: brightness(0.7) saturate(1.05) !important; }
+    .color__title .ch { transform: none !important; opacity: 1 !important; }
+    .color__title .word .ul { transform: scaleX(1) !important; }
+    .green__media { filter: brightness(0.7) saturate(1.05) blur(0) !important; }
+    .cover__curtain { transform: translateY(100%) !important; }
+    .interlude__rail { transform: none !important; }
   }
 </style>
 </head>
@@ -714,6 +874,7 @@
   <section class="cover" id="cover" aria-label="Cover">
     <div class="cover__bg" data-cover-bg></div>
     <div class="cover__veil"></div>
+    <div class="cover__curtain" data-cover-curtain aria-hidden="true"></div>
 
     <div class="cover__frame">
       <div class="cover__hgroup">
@@ -785,6 +946,20 @@
     </div>
   </section>
 
+  <!-- ─── Interlude · Salt → Stone (horizontal type marquee) ────────── -->
+  <section class="interlude" aria-hidden="true">
+    <div class="interlude__pin" data-interlude-pin>
+      <div class="interlude__bg" data-interlude-bg></div>
+      <div class="interlude__rail" data-interlude-rail>
+        <span class="ir-num">II</span><span class="ir-word">Stone</span><span class="ir-sep">·</span><span class="ir-word">Pisac</span><span class="ir-arrow">→</span><span class="ir-word">Cusco</span><span class="ir-sep">·</span><span class="ir-word"><em>1,420 km</em></span>
+      </div>
+      <div class="interlude__meta" data-interlude-meta>
+        <span>Chapter break</span>
+        <span><span data-interlude-counter>00</span>%</span>
+      </div>
+    </div>
+  </section>
+
   <!-- ─── II · Stone (pinned two-panel reveal) ──────────────────────── -->
   <section class="chapter stone" id="stone" aria-labelledby="stone-h">
     <div class="stone__pin" data-stone-pin>
@@ -798,6 +973,7 @@
         <img src="assets/peru/03-cusco.png" alt="A burgundy G-Class threading a narrow cobbled alley in Cusco, walled by Inca stonework and lit by a single overhead lantern." />
         <div class="stone__panel__veil"></div>
       </div>
+      <div class="stone__seam" data-stone-seam aria-hidden="true"></div>
 
       <div class="stone__overlay">
         <div class="stone__title-wrap">
@@ -830,11 +1006,20 @@
       <div class="color__head">
         <p class="kicker" style="color: var(--paper); opacity: 0.7">Chapter III</p>
         <h2 class="color__title" id="color-h" data-color-title>
-          <span class="word"><span class="ch">R</span><span class="ch">o</span><span class="ch">j</span><span class="ch">o</span></span>
+          <span class="word" data-mineral="#E07260" style="--mineral:#E07260">
+            <span class="ch-wrap"><span class="ch">R</span></span><span class="ch-wrap"><span class="ch">o</span></span><span class="ch-wrap"><span class="ch">j</span></span><span class="ch-wrap"><span class="ch">o</span></span>
+            <span class="ul" aria-hidden="true"></span>
+          </span>
           <span class="dot" aria-hidden="true"></span>
-          <span class="word"><span class="ch">O</span><span class="ch">r</span><span class="ch">o</span></span>
+          <span class="word" data-mineral="#E5B36C" style="--mineral:#E5B36C">
+            <span class="ch-wrap"><span class="ch">O</span></span><span class="ch-wrap"><span class="ch">r</span></span><span class="ch-wrap"><span class="ch">o</span></span>
+            <span class="ul" aria-hidden="true"></span>
+          </span>
           <span class="dot" aria-hidden="true"></span>
-          <span class="word"><span class="ch">V</span><span class="ch">e</span><span class="ch">r</span><span class="ch">d</span><span class="ch">e</span></span>
+          <span class="word" data-mineral="#9CB07A" style="--mineral:#9CB07A">
+            <span class="ch-wrap"><span class="ch">V</span></span><span class="ch-wrap"><span class="ch">e</span></span><span class="ch-wrap"><span class="ch">r</span></span><span class="ch-wrap"><span class="ch">d</span></span><span class="ch-wrap"><span class="ch">e</span></span>
+            <span class="ul" aria-hidden="true"></span>
+          </span>
         </h2>
       </div>
 
@@ -874,6 +1059,12 @@
     <div class="green__pin" data-green-pin>
       <div class="green__media" data-green-media></div>
       <div class="green__mist" data-green-mist></div>
+
+      <aside class="green__coords" data-green-coords aria-hidden="true">
+        <span>Altitude</span>
+        <b>1,840 m</b>
+        <span>−12.27° / −71.41°</span>
+      </aside>
 
       <div class="green__overlay">
         <div class="green__hgroup">
@@ -1094,30 +1285,45 @@
       });
     }
 
-    // parallax + zoom on scroll
+    // scroll handoff: cover pins briefly, BG zooms hard and desaturates,
+    // a paper-coloured "salt curtain" rises from below to wipe over the image
     if (!reduce) {
-      gsap.to(bg, {
-        scale: 1.12,
-        yPercent: 8,
-        ease: 'none',
+      const curtain = cover.querySelector('[data-cover-curtain]');
+
+      const handoff = gsap.timeline({
         scrollTrigger: {
           trigger: cover,
           start: 'top top',
-          end: 'bottom top',
-          scrub: 0.6,
+          end: '+=110%',
+          scrub: 0.7,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
         },
       });
-      gsap.to('.cover__frame', {
-        yPercent: -20,
+
+      // BG: deep zoom + drift + drain saturation + dim
+      handoff.to(bg, {
+        scale: 1.42,
+        yPercent: 14,
+        filter: 'saturate(0.35) brightness(0.55) contrast(1.05)',
+        ease: 'none',
+      }, 0);
+
+      // copy lifts and blurs out
+      handoff.to('.cover__frame', {
+        yPercent: -42,
         opacity: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: cover,
-          start: 'top top',
-          end: 'bottom 30%',
-          scrub: 0.6,
-        },
-      });
+        filter: 'blur(6px)',
+        ease: 'power1.in',
+      }, 0);
+
+      // curtain rises like a salt-flat horizon climbing the frame
+      handoff.fromTo(curtain,
+        { yPercent: 100 },
+        { yPercent: 0, ease: 'power2.inOut' },
+        0.25
+      );
     }
   }
 
@@ -1183,6 +1389,85 @@
   }
 
   /* ──────────────────────────────────────────────────────────────────
+     Interlude — Salt → Stone, horizontal type marquee
+     ────────────────────────────────────────────────────────────────── */
+  function initInterlude() {
+    const il = document.querySelector('.interlude');
+    if (!il) return;
+    const pin = il.querySelector('[data-interlude-pin]');
+    const rail = il.querySelector('[data-interlude-rail]');
+    const bg = il.querySelector('[data-interlude-bg]');
+    const meta = il.querySelector('[data-interlude-meta]');
+    const counter = il.querySelector('[data-interlude-counter]');
+    if (!rail) return;
+
+    if (reduce) {
+      // static rendering
+      bg.style.background = '#0d0b08';
+      rail.style.color = 'var(--paper)';
+      meta.style.color = 'var(--paper)';
+      return;
+    }
+
+    // measure how far the rail overflows the viewport — that's our travel
+    const measure = () => {
+      const railW = rail.scrollWidth;
+      const vw = window.innerWidth;
+      // travel = how much we need to slide so the tail clears the left edge
+      return Math.max(railW - vw * 0.4, vw * 0.6);
+    };
+
+    let travel = measure();
+    window.addEventListener('resize', () => {
+      travel = measure();
+      ScrollTrigger.refresh();
+    });
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: pin,
+        start: 'top top',
+        end: '+=160%',
+        pin: true,
+        scrub: 0.8,
+        anticipatePin: 1,
+      },
+    });
+
+    // rail slides leftward with a slight wght build-up
+    tl.fromTo(rail,
+      { x: () => window.innerWidth * 0.25, fontVariationSettings: '"opsz" 144, "SOFT" 80, "wght" 240' },
+      {
+        x: () => -travel,
+        fontVariationSettings: '"opsz" 144, "SOFT" 10, "wght" 460',
+        ease: 'none',
+      },
+      0
+    );
+
+    // background crossfade: salt cream → stone dark, mid-scroll
+    tl.fromTo(bg,
+      { backgroundColor: '#f1ece1' },
+      { backgroundColor: '#0d0b08', ease: 'none' },
+      0.32
+    );
+
+    // type colour inverts to keep contrast on the new dark bg
+    tl.to(rail, { color: '#f1ece1', ease: 'none' }, 0.32);
+    tl.to(meta, { color: '#f1ece1', opacity: 0.7, ease: 'none' }, 0.32);
+
+    // counter ticks 0 → 100 across the whole scrub
+    if (counter) {
+      const proxy = { v: 0 };
+      tl.to(proxy, {
+        v: 100,
+        ease: 'none',
+        onUpdate: () => { counter.textContent = String(Math.round(proxy.v)).padStart(2, '0'); },
+      }, 0);
+    }
+  }
+
+  /* ──────────────────────────────────────────────────────────────────
      II — Stone (pinned, two-panel reveal)
      ────────────────────────────────────────────────────────────────── */
   function initStone() {
@@ -1225,20 +1510,36 @@
       },
     });
 
-    // Phase 1: gentle parallax on A
-    tl.to(imgA, { scale: 1.08, yPercent: -4, ease: 'none' }, 0);
+    // Phase 1: A drifts (slight ken-burns) and slides slightly left as B prepares
+    tl.to(imgA, { scale: 1.10, xPercent: -6, ease: 'none' }, 0);
 
-    // Phase 2: B clip-path slides up over A
+    // Phase 2: B slides in from the right — a horizontal curtain.
+    //   • panelB clip-path opens from the right edge across to the left
+    //   • imgB itself has a counter-parallax (starts further right, settles)
+    //   • the seam-hairline rides the leading edge of the reveal
+    const seam = stone.querySelector('[data-stone-seam]');
     tl.to(panelB, {
-      clipPath: 'inset(0% 0 0 0)',
+      clipPath: 'inset(0 0 0 0%)',
       duration: 1,
-      ease: 'power2.inOut',
-    }, 0.35);
+      ease: 'power3.inOut',
+    }, 0.30);
     tl.fromTo(imgB,
-      { scale: 1.16, yPercent: 4 },
-      { scale: 1.0, yPercent: 0, ease: 'none', duration: 1 },
-      0.35
+      { scale: 1.14, xPercent: 10 },
+      { scale: 1.0, xPercent: 0, ease: 'none', duration: 1 },
+      0.30
     );
+    if (seam) {
+      // seam rides the leading edge of the clip-path reveal across the viewport
+      const vw = () => window.innerWidth;
+      gsap.set(seam, { x: vw(), opacity: 0 });
+      tl.to(seam, {
+        x: () => 0,
+        opacity: 0.85,
+        ease: 'power3.inOut',
+        duration: 1,
+      }, 0.30);
+      tl.to(seam, { opacity: 0, duration: 0.2, ease: 'power2.in' }, 1.25);
+    }
 
     // Phase 3: crossfade type
     tl.to(wordStone, { opacity: 0, yPercent: -10, duration: 0.4, ease: 'power2.in' }, 0.55);
@@ -1263,35 +1564,78 @@
     if (!color) return;
     const title = color.querySelector('[data-color-title]');
     const media = color.querySelector('[data-color-media]');
-    const chars = title ? title.querySelectorAll('.ch') : [];
+    const words = title ? title.querySelectorAll('.word') : [];
+    const dots = title ? title.querySelectorAll('.dot') : [];
     const chips = color.querySelectorAll('[data-color-swatches] .chip');
 
-    // intro: characters drop in
-    gsap.from(chars, {
-      yPercent: 110, opacity: 0,
-      duration: 1.0, ease: 'expo.out', stagger: 0.025,
-      scrollTrigger: { trigger: color, start: 'top 70%' },
-    });
-
-    // weight + soft morph driven by scroll
-    if (!reduce) {
-      ScrollTrigger.create({
-        trigger: color,
-        start: 'top 80%',
-        end: 'bottom 20%',
-        scrub: 0.6,
-        onUpdate(self) {
-          const p = self.progress; // 0..1
-          chars.forEach((ch, i) => {
-            const phase = (p + i * 0.03) % 1;
-            const wght = 240 + Math.sin(phase * Math.PI) * 460;
-            const soft = 20 + Math.sin((phase + 0.3) * Math.PI) * 80;
-            ch.style.fontVariationSettings =
-              `"opsz" 144, "SOFT" ${soft.toFixed(0)}, "wght" ${wght.toFixed(0)}`;
-          });
+    // word-by-word "ignition": each word lights up in sequence as we scroll.
+    // start state: all chars hidden below their masks, dim weight.
+    if (!reduce && words.length) {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: color,
+          start: 'top 75%',
+          end: 'top -10%',
+          scrub: 0.7,
         },
       });
 
+      words.forEach((word, wi) => {
+        const chars = word.querySelectorAll('.ch');
+        const ul = word.querySelector('.ul');
+        const mineral = word.dataset.mineral || '#d6b87a';
+        const t0 = wi * 0.85; // each word's ignition starts here
+
+        // chars drop up out of the mask
+        tl.to(chars, {
+          yPercent: 0,
+          duration: 0.55,
+          ease: 'expo.out',
+          stagger: 0.05,
+        }, t0);
+
+        // weight + colour snap: 220 → 720, paper → mineral, then settle to 520
+        tl.to(chars, {
+          color: mineral,
+          fontVariationSettings: '"opsz" 144, "SOFT" 20, "wght" 720',
+          duration: 0.45,
+          ease: 'power2.out',
+          stagger: 0.04,
+        }, t0 + 0.10);
+        tl.to(chars, {
+          fontVariationSettings: '"opsz" 144, "SOFT" 30, "wght" 520',
+          duration: 0.55,
+          ease: 'power3.out',
+        }, t0 + 0.55);
+
+        // mineral underline draws under the word
+        if (ul) {
+          tl.fromTo(ul,
+            { scaleX: 0 },
+            { scaleX: 1, duration: 0.55, ease: 'expo.out' },
+            t0 + 0.18
+          );
+        }
+
+        // dot before the next word pulses on
+        const dot = dots[wi];
+        if (dot) {
+          tl.to(dot, {
+            opacity: 1, scale: 1,
+            duration: 0.3, ease: 'expo.out',
+          }, t0 + 0.45);
+        }
+      });
+    } else if (reduce && words.length) {
+      // make everything visible immediately under reduced motion
+      title.querySelectorAll('.ch').forEach(ch => {
+        ch.style.transform = 'none';
+        ch.style.opacity = 1;
+      });
+      title.querySelectorAll('.ul').forEach(ul => ul.style.transform = 'scaleX(1)');
+    }
+
+    if (!reduce) {
       // clip-path reveal of the image
       gsap.to(media, {
         clipPath: 'inset(0% 0% 0% 0%)',
@@ -1355,34 +1699,84 @@
     });
 
     function mount() {
-      // intro
-      gsap.from(green.querySelectorAll('[data-split-title] .reveal-word > span'), {
-        yPercent: 110, duration: 1.0, ease: 'expo.out', stagger: 0.06,
-        scrollTrigger: { trigger: green, start: 'top 65%' },
-      });
-      gsap.from(green.querySelectorAll('[data-split-lines] .reveal-word > span'), {
-        yPercent: 110, duration: 0.9, ease: 'expo.out',
-        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.14,
-        scrollTrigger: { trigger: green, start: 'top 55%' },
-      });
-      gsap.from(green.querySelectorAll('.kicker, .green__foot'), {
-        opacity: 0, y: 18, duration: 0.8, ease: 'power3.out', stagger: 0.08,
-        scrollTrigger: { trigger: green, start: 'top 55%' },
+      const titleSpans = green.querySelectorAll('[data-split-title] .reveal-word > span');
+      const lineSpans  = green.querySelectorAll('[data-split-lines] .reveal-word > span');
+      const coords     = green.querySelector('[data-green-coords]');
+
+      if (reduce) {
+        gsap.set([titleSpans, lineSpans], { yPercent: 0 });
+        gsap.set('.kicker, .green__foot', { opacity: 1, y: 0 });
+        if (coords) gsap.set(coords, { opacity: 1, y: 0 });
+        return;
+      }
+
+      // hold the section visible while the long reveal scrubs through it.
+      // Phase plan (0..1):
+      //  0.00 — frame arrives, image dim+blurred, mist heavy
+      //  0.10 — title chars climb out of the mist
+      //  0.30 — image blur clears, brightness climbs
+      //  0.45 — lede lines reveal in groups
+      //  0.65 — coordinates panel slides up on the right
+      //  0.85 — final settle, foot strip locks in
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pin,
+          start: 'top top',
+          end: '+=180%',
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+        },
       });
 
-      if (reduce) return;
+      // image — runs across the whole scrub: blur clears, brightness/saturation rise
+      tl.to(media, {
+        filter: 'brightness(0.95) saturate(1.18) blur(0px)',
+        scale: 1.09,
+        ease: 'none',
+      }, 0);
 
-      // mist lift + image brighten as we scroll through
-      ScrollTrigger.create({
-        trigger: pin,
-        start: 'top top',
-        end: '+=120%',
-        pin: true,
-        scrub: 0.6,
-        animation: gsap.timeline()
-          .to(media, { filter: 'brightness(0.78) saturate(1.04)', scale: 1.06, ease: 'none' }, 0)
-          .to(mist, { opacity: 0.4, yPercent: -10, ease: 'none' }, 0),
-      });
+      // mist — lifts upward and thins out
+      tl.to(mist, {
+        opacity: 0.22,
+        yPercent: -28,
+        ease: 'none',
+      }, 0);
+
+      // title chars climb in
+      tl.from(titleSpans, {
+        yPercent: 110,
+        duration: 0.35,
+        ease: 'expo.out',
+        stagger: 0.05,
+      }, 0.08);
+
+      // kicker rises
+      tl.from(green.querySelectorAll('.kicker'), {
+        opacity: 0, y: 16, duration: 0.2, ease: 'power3.out',
+      }, 0.05);
+
+      // lede line-grouped reveal
+      tl.from(lineSpans, {
+        yPercent: 110,
+        duration: 0.4,
+        ease: 'expo.out',
+        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
+      }, 0.35);
+
+      // coordinates panel slides up on the right
+      if (coords) {
+        tl.fromTo(coords,
+          { opacity: 0, y: 30 },
+          { opacity: 0.9, y: 0, duration: 0.35, ease: 'expo.out' },
+          0.55
+        );
+      }
+
+      // foot strip locks in at the very end
+      tl.from(green.querySelectorAll('.green__foot'), {
+        opacity: 0, y: 12, duration: 0.25, ease: 'power3.out',
+      }, 0.75);
     }
   }
 
@@ -1469,6 +1863,7 @@
   function boot() {
     initCover();
     initSalt();
+    initInterlude();
     initStone();
     initColor();
     initGreen();
