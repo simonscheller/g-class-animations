@@ -300,9 +300,9 @@
   }
 
   .reveal-word { display: inline-block; overflow: hidden; }
-  .reveal-word > span { display: inline-block; transform: translateY(110%); will-change: transform; }
+  .reveal-word > span { display: inline-block; will-change: transform; visibility: hidden; }
   .reveal-line { display: block; overflow: hidden; }
-  .reveal-line > span { display: block; transform: translateY(110%); will-change: transform; }
+  .reveal-line > span { display: block; will-change: transform; visibility: hidden; }
 
   /* -------------------------------------------------------------------------
      I — Salt
@@ -835,8 +835,8 @@
     display: inline-block;
     will-change: font-variation-settings, transform, color;
     font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 220;
-    transform: translateY(108%);
     color: var(--paper);
+    visibility: hidden;
   }
   /* mineral underline — drawn under each word during its ignition */
   .color__title .word .ul {
@@ -917,12 +917,11 @@
     overflow: hidden;
   }
   .green__media {
-    position: absolute; inset: -8%;
+    position: absolute; inset: -6%;
     background-image: url("assets/peru/05-cloud-forest.png");
     background-size: cover; background-position: 50% 50%;
-    will-change: transform, filter, opacity;
-    filter: brightness(0.28) saturate(0.72) blur(8px);
-    transform: scale(1.02);
+    will-change: transform;
+    filter: brightness(0.85) saturate(1.05);
   }
   .green__coords {
     position: absolute;
@@ -1437,14 +1436,14 @@
       <div class="descent__veil"></div>
       <div class="descent__counter" data-descent-counter>
         <span class="k">Elev.</span>
-        <span class="v" data-descent-elev>4,310</span><span class="u">m</span>
+        <span class="v" data-descent-elev>1,840</span><span class="u">m</span>
       </div>
       <div class="descent__overlay">
         <div class="descent__hgroup">
           <p class="kicker" style="color: var(--paper); opacity: 0.7">Plate 08 · Bridge</p>
-          <h2 class="descent__title" id="descent-h" data-split-title>Descent.</h2>
+          <h2 class="descent__title" id="descent-h" data-split-title>Ridge.</h2>
           <p class="descent__lede" data-split-lines>
-            From 4,310 m to 1,840 m in 38 km. <em>Seven switchbacks,</em> two gears down, no shoulder.
+            Seven hairpins between salt and forest. <em>1,840 m at the floor, 4,310 m at the top.</em> Two gears down on the way through.
           </p>
         </div>
       </div>
@@ -1563,6 +1562,11 @@
         node.appendChild(wrap);
       }
     });
+    // GSAP owns the initial hidden state — CSS visibility:hidden prevents FOUC
+    gsap.set(node.querySelectorAll('.reveal-word > span'), {
+      yPercent: 110,
+      visibility: 'visible',
+    });
   }
 
   // Wrap each word (across nested inline tags) in an inline-block span,
@@ -1626,6 +1630,12 @@
 
     node.__words = wordSpans;
     node.__lines = lineIdx + 1;
+
+    // GSAP owns the initial hidden state — CSS visibility:hidden prevents FOUC
+    gsap.set(node.querySelectorAll('.reveal-word > span'), {
+      yPercent: 110,
+      visibility: 'visible',
+    });
   }
 
   /* ──────────────────────────────────────────────────────────────────
@@ -1652,19 +1662,27 @@
       row.appendChild(wrap);
     });
 
-    // entrance
+    // GSAP owns the hidden state — required because CSS-only translateY doesn't
+    // play well with later from()/fromTo() resolution of the "current" value.
+    gsap.set(title.querySelectorAll('.reveal-word > span'), {
+      yPercent: 110,
+      visibility: 'visible',
+    });
+
+    // entrance — rows climb out of the mask
     const intro = gsap.timeline({ delay: 0.15 });
-    intro.fromTo(title.querySelectorAll('.reveal-word > span'),
-      { yPercent: 110 },
-      { yPercent: 0, duration: 1.05, ease: 'expo.out', stagger: 0.085 }
-    );
+    intro.to(title.querySelectorAll('.reveal-word > span'), {
+      yPercent: 0, duration: 1.05, ease: 'expo.out', stagger: 0.085,
+    });
     intro.from('.cover__eyebrow, .cover__sub, .cover__foot', {
       y: 24, opacity: 0,
       duration: 0.9, ease: 'expo.out', stagger: 0.08,
     }, '-=0.7');
 
-    // altimeter count-up
+    // altimeter — counts up from 1 m to 4,505 m as the user scrolls through
+    // the cover. It's tied to scroll so it feels like ascent.
     const altimeterTarget = 4505;
+    const altimeterStart = 1;
     const altimeterNode = title.querySelector('[data-altimeter]');
     if (altimeterNode) {
       const fmt = (n) => Math.round(n).toLocaleString('en-US');
@@ -1673,11 +1691,24 @@
           `<span class="digit">${c}</span>`
         ).join('');
       };
-      gsap.to({ v: 0 }, {
-        v: altimeterTarget,
-        duration: 2.6, delay: 0.6, ease: 'power2.out',
-        onUpdate: function () { fill(fmt(this.targets()[0].v)); },
-      });
+      // initial paint at "1"
+      fill(fmt(altimeterStart));
+      if (!reduce) {
+        const proxy = { v: altimeterStart };
+        gsap.to(proxy, {
+          v: altimeterTarget,
+          ease: 'none',
+          onUpdate: () => fill(fmt(proxy.v)),
+          scrollTrigger: {
+            trigger: cover,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        });
+      } else {
+        fill(fmt(altimeterTarget));
+      }
     }
 
     // scroll handoff: gentler ken-burns + slow fade, no pin (the pin was
@@ -1888,7 +1919,7 @@
         scrollTrigger: {
           trigger: pin,
           start: 'top top',
-          end: '+=160%',
+          end: '+=90%',
           pin: true,
           scrub: 0.8,
           anticipatePin: 1,
@@ -1979,10 +2010,11 @@
         ease: 'none',
       }, 0);
 
-      // counter ticks from 4,310 m down to 1,840 m
-      const proxy = { v: 4310 };
+      // counter ticks UP from 1,840 m at the cloud-forest floor to 4,310 m at
+      // the ridge — matches the visual reading of the road climbing the frame.
+      const proxy = { v: 1840 };
       tl.to(proxy, {
-        v: 1840,
+        v: 4310,
         ease: 'none',
         onUpdate: () => {
           if (elev) elev.textContent = Math.round(proxy.v).toLocaleString('en-US');
@@ -2057,7 +2089,7 @@
       scrollTrigger: {
         trigger: pin,
         start: 'top top',
-        end: '+=160%',
+        end: '+=90%',
         pin: true,
         scrub: 0.8,
         anticipatePin: 1,
@@ -2201,6 +2233,12 @@
     // word-by-word "ignition": each word lights up in sequence as we scroll.
     // start state: all chars hidden below their masks, dim weight.
     if (!reduce && words.length) {
+      // GSAP owns the hidden state — set immediately, before the timeline is
+      // created, so the chars actually start at yPercent 110 (not at the CSS
+      // default 0 which would leave them visible but un-animated).
+      const allChars = title.querySelectorAll('.ch');
+      gsap.set(allChars, { yPercent: 110, visibility: 'visible' });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: color,
@@ -2216,13 +2254,12 @@
         const mineral = word.dataset.mineral || '#d6b87a';
         const t0 = wi * 0.85; // each word's ignition starts here
 
-        // chars drop up out of the mask
-        tl.to(chars, {
-          yPercent: 0,
-          duration: 0.55,
-          ease: 'expo.out',
-          stagger: 0.05,
-        }, t0);
+        // chars climb up out of the mask
+        tl.fromTo(chars,
+          { yPercent: 110 },
+          { yPercent: 0, duration: 0.55, ease: 'expo.out', stagger: 0.05 },
+          t0
+        );
 
         // weight + colour snap: 220 → 720, paper → mineral, then settle to 520
         tl.to(chars, {
@@ -2258,10 +2295,7 @@
       });
     } else if (reduce && words.length) {
       // make everything visible immediately under reduced motion
-      title.querySelectorAll('.ch').forEach(ch => {
-        ch.style.transform = 'none';
-        ch.style.opacity = 1;
-      });
+      gsap.set(title.querySelectorAll('.ch'), { yPercent: 0, visibility: 'visible' });
       title.querySelectorAll('.ul').forEach(ul => ul.style.transform = 'scaleX(1)');
     }
 
@@ -2300,22 +2334,25 @@
       duration: 0.9, ease: 'power3.out', stagger: 0.1,
       scrollTrigger: { trigger: color, start: 'top 55%' },
     });
-    gsap.to(chips, {
-      scaleX: 1,
-      duration: 0.9, ease: 'expo.out', stagger: 0.08,
-      scrollTrigger: { trigger: '[data-color-swatches]', start: 'top 85%' },
-    });
+    // explicit fromTo for chips — CSS-defined scaleX(0) doesn't reliably
+    // resolve as the "current" value for gsap.to()
+    gsap.fromTo(chips,
+      { scaleX: 0 },
+      {
+        scaleX: 1,
+        duration: 0.9, ease: 'expo.out', stagger: 0.08,
+        scrollTrigger: { trigger: '[data-color-swatches]', start: 'top 85%' },
+      }
+    );
   }
 
   /* ──────────────────────────────────────────────────────────────────
-     IV — Green (mist lift)
+     IV — Green (final plate — clean full-bleed editorial reveal)
      ────────────────────────────────────────────────────────────────── */
   function initGreen() {
     const green = document.querySelector('.green');
     if (!green) return;
-    const pin = green.querySelector('[data-green-pin]');
     const media = green.querySelector('[data-green-media]');
-    const mist = green.querySelector('[data-green-mist]');
     const title = green.querySelector('[data-split-title]');
     const lede = green.querySelector('[data-split-lines]');
 
@@ -2333,81 +2370,46 @@
       const lineSpans  = green.querySelectorAll('[data-split-lines] .reveal-word > span');
       const coords     = green.querySelector('[data-green-coords]');
 
-      if (reduce) {
-        gsap.set([titleSpans, lineSpans], { yPercent: 0 });
-        gsap.set('.kicker, .green__foot', { opacity: 1, y: 0 });
-        if (coords) gsap.set(coords, { opacity: 1, y: 0 });
-        return;
-      }
-
-      // hold the section visible while the long reveal scrubs through it.
-      // Phase plan (0..1):
-      //  0.00 — frame arrives, image dim+blurred, mist heavy
-      //  0.10 — title chars climb out of the mist
-      //  0.30 — image blur clears, brightness climbs
-      //  0.45 — lede lines reveal in groups
-      //  0.65 — coordinates panel slides up on the right
-      //  0.85 — final settle, foot strip locks in
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: pin,
-          start: 'top top',
-          end: '+=180%',
-          pin: true,
-          scrub: 0.8,
-          anticipatePin: 1,
-        },
+      // intro reveals on entry — no pin, no scrub, just one clean stagger
+      const introTl = gsap.timeline({
+        scrollTrigger: { trigger: green, start: 'top 70%' },
       });
-
-      // image — runs across the whole scrub: blur clears, brightness/saturation rise
-      tl.to(media, {
-        filter: 'brightness(0.95) saturate(1.18) blur(0px)',
-        scale: 1.09,
-        ease: 'none',
-      }, 0);
-
-      // mist — lifts upward and thins out
-      tl.to(mist, {
-        opacity: 0.22,
-        yPercent: -28,
-        ease: 'none',
-      }, 0);
-
-      // title chars climb in
-      tl.fromTo(titleSpans,
-        { yPercent: 110 },
-        { yPercent: 0, duration: 0.35, ease: 'expo.out', stagger: 0.05 },
-        0.08
-      );
-
-      // kicker rises
-      tl.from(green.querySelectorAll('.kicker'), {
-        opacity: 0, y: 16, duration: 0.2, ease: 'power3.out',
-      }, 0.05);
-
-      // lede line-grouped reveal
-      tl.fromTo(lineSpans,
-        { yPercent: 110 },
-        {
-          yPercent: 0, duration: 0.4, ease: 'expo.out',
-          stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.10,
-        },
-        0.35
-      );
-
-      // coordinates panel slides up on the right
+      introTl.from(green.querySelectorAll('.kicker'), {
+        opacity: 0, y: 18, duration: 0.7, ease: 'power3.out',
+      });
+      introTl.to(titleSpans, {
+        yPercent: 0, duration: 0.9, ease: 'expo.out', stagger: 0.05,
+      }, '-=0.5');
+      introTl.to(lineSpans, {
+        yPercent: 0, duration: 0.85, ease: 'expo.out',
+        stagger: (_, target) => (+target.parentElement.dataset.line || 0) * 0.12,
+      }, '-=0.55');
       if (coords) {
-        tl.fromTo(coords,
-          { opacity: 0, y: 30 },
-          { opacity: 0.9, y: 0, duration: 0.35, ease: 'expo.out' },
-          0.55
+        introTl.fromTo(coords,
+          { opacity: 0, y: 24 },
+          { opacity: 0.9, y: 0, duration: 0.7, ease: 'expo.out' },
+          '-=0.5'
         );
       }
+      introTl.from(green.querySelectorAll('.green__foot'), {
+        opacity: 0, y: 14, duration: 0.6, ease: 'power3.out',
+      }, '-=0.4');
 
-      // foot strip locks in at the very end
-      tl.from(green.querySelectorAll('.green__foot'), {
-        opacity: 0, y: 12, duration: 0.25, ease: 'power3.out',
-      }, 0.75);
+      if (reduce) return;
+
+      // gentle ken-burns on the background image across the section scroll —
+      // no blur clear, no brightness scrub. Final plate sits and breathes.
+      gsap.to(media, {
+        scale: 1.05,
+        yPercent: -3,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: green,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 0.8,
+        },
+      });
     }
   }
 
@@ -2500,7 +2502,7 @@
       { sel: '.stone',     idx: '02',   label: 'II — Stone' },
       { sel: '.encounter', idx: '02.b', label: 'Bridge — Encounter' },
       { sel: '.color',     idx: '03',   label: 'III — Color' },
-      { sel: '.descent',   idx: '03.b', label: 'Bridge — Descent' },
+      { sel: '.descent',   idx: '03.b', label: 'Bridge — Ridge' },
       { sel: '.green',     idx: '04',   label: 'IV — Green' },
     ];
 
